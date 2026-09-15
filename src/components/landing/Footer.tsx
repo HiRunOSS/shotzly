@@ -5,7 +5,7 @@ import Link from "next/link";
 export function MakeItLastBadge() {
   return (
     <a
-      href="https://www.makeitla.st/"
+      href="https://www.makeitla.st/tools/shotzly"
       title="Featured on MakeItLast"
       target="_blank"
       rel="noreferrer"
@@ -15,7 +15,7 @@ export function MakeItLastBadge() {
         alt="Featured on MakeItLast"
         width={252}
         height={76}
-        className="h-8 w-auto"
+        className="h-6 w-auto"
       />
     </a>
   );
@@ -32,7 +32,7 @@ export default function LandingFooter() {
       label: "Report Issue",
       href: "https://github.com/HiRunOSS/shotzly/issues",
     },
-    {label: "GitHub", href: "https://github.com/HiRunOSS/shotzly"},
+    { label: "GitHub", href: "https://github.com/HiRunOSS/shotzly" },
   ];
 
   return (
@@ -77,12 +77,12 @@ export default function LandingFooter() {
               <img
                 src="https://www.scrolllaunch.com/api/badge/shotzly?variant=launched&theme=light"
                 alt="Shotzly - Featured on ScrollLaunch"
-                className="h-8 w-auto"
+                className="h-6 w-auto"
               />
             </a>
 
             <a
-              href="https://twelve.tools/shotzly-live"
+              href="https://twelve.tools/shotzly"
               target="_blank"
               rel="noreferrer"
               aria-label="Featured on Twelve Tools"
@@ -92,7 +92,7 @@ export default function LandingFooter() {
                 alt="Featured on Twelve Tools"
                 width="148"
                 height="40"
-                className="h-8 w-auto"
+                className="h-6 w-auto"
               />
             </a>
             <MakeItLastBadge />

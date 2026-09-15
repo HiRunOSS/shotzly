@@ -30,11 +30,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_NAME,
   title: {
-    default: "Snippify - Free Code Snippet Generator & Screenshot Editor",
+    default: "Shotzly - Free Code Snippet Generator & Screenshot Editor",
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    "Create beautiful code snippet images, keyboard-style code visuals, and polished screenshots online. Snippify is a free code screenshot generator and screenshot editor for developers, bloggers, and docs.",
+    "Create beautiful code snippet images, keyboard-style code visuals, and polished screenshots online. Shotzly is a free code screenshot generator and screenshot editor for developers, bloggers, and docs.",
   keywords: coreKeywords,
   authors: [{name: SITE_CREATOR, url: SITE_CREATOR_URL}],
   creator: SITE_CREATOR,
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: SITE_URL,
-    title: "Snippify - Free Code Snippet Generator & Screenshot Editor",
+    title: "Shotzly - Free Code Snippet Generator & Screenshot Editor",
     description:
       "Generate shareable code screenshots with syntax highlighting, themes, backgrounds, and an online screenshot editor. Free, fast, and built for developers.",
     siteName: SITE_NAME,
@@ -60,13 +60,13 @@ export const metadata: Metadata = {
         url: DEFAULT_OG_IMAGE,
         width: 1920,
         height: 990,
-        alt: "Snippify code snippet generator and screenshot editor preview",
+        alt: "Shotzly code snippet generator and screenshot editor preview",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Snippify - Free Code Snippet Generator",
+    title: "Shotzly - Free Code Snippet Generator",
     description:
       "Create code snippet images, keyboard-style code visuals, and polished screenshots for docs and social posts.",
     creator: "@hiarun02",

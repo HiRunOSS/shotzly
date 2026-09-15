@@ -16,7 +16,7 @@ export default function Navbar() {
               <Image
                 className="rounded-full"
                 src="/icon.svg"
-                alt="Snippify logo"
+                alt="Shotzly logo"
                 width={24}
                 height={24}
                 priority
@@ -24,7 +24,7 @@ export default function Navbar() {
             </span>
             <div className="leading-tight">
               <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                Snippify
+                Shotzly
               </p>
             </div>
           </div>

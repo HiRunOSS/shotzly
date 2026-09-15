@@ -35,7 +35,7 @@ import {Copy, Download, ImageIcon, Trash2} from "lucide-react";
 import {FaGithub} from "react-icons/fa6";
 
 const X_PROFILE_URL = "https://x.com/hiarun02";
-const GITHUB_REPO_URL = "https://github.com/hiarun02/snippify";
+const GITHUB_REPO_URL = "https://github.com/HiRunOSS/shotzly";
 
 export default function EditorPageClient() {
   const [stars, setStars] = useState<number | null>(null);
@@ -75,7 +75,7 @@ export default function EditorPageClient() {
     const fetchStars = async () => {
       try {
         const response = await fetch(
-          "https://api.github.com/repos/hiarun02/snippify",
+          "https://api.github.com/repos/HiRunOSS/shotzly",
         );
 
         if (!response.ok) {
@@ -146,7 +146,7 @@ export default function EditorPageClient() {
       previewRef,
       {
         format: screenshotExportFormat,
-        filename: `snippify-screenshot-${screenshotExportResolution}.${screenshotExportFormat}`,
+        filename: `shotzly-screenshot-${screenshotExportResolution}.${screenshotExportFormat}`,
         resolution: screenshotExportResolution,
       },
       () => {
@@ -207,7 +207,7 @@ export default function EditorPageClient() {
                 href={GITHUB_REPO_URL}
                 target="_blank"
                 rel="noreferrer"
-                aria-label="Star Snippify on GitHub"
+                aria-label="Star Shotzly on GitHub"
                 className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold leading-none tabular-nums text-gray-700 transition-colors hover:bg-black/5 hover:text-black focus:outline-none focus:ring-1 focus:ring-blue-400 dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
               >
                 <FaGithub className="h-3.5 w-3.5 text-gray-500 dark:text-white/55" />

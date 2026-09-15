@@ -12,7 +12,7 @@ export const metadata = generateEditorMetadata();
 const editorSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Snippify Editor",
+  name: "Shotzly Editor",
   applicationCategory: "DeveloperApplication",
   operatingSystem: "Web",
   url: absoluteUrl("/editor"),

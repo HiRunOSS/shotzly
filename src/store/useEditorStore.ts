@@ -149,7 +149,7 @@ const PREVIOUS_SCREENSHOT_DEFAULT_GRADIENT =
   "center / cover no-repeat url('/backgrounds/macos/mac-bg-2.jpg')";
 const DEFAULT_SCREENSHOT_GRADIENT =
   "center / cover no-repeat url('/backgrounds/macos/mac-bg-7.png')";
-const STORAGE_KEY = "snippify-editor-state";
+const STORAGE_KEY = "shotzly-editor-state";
 const CODE_SAVE_DEBOUNCE_MS = 250;
 const MAX_PERSISTED_IMAGE_SIZE_BYTES = 12 * 1024 * 1024;
 
@@ -303,7 +303,7 @@ export const useEditorStore = create<EditorStore>((set) => {
     screenshotGradient: DEFAULT_SCREENSHOT_GRADIENT,
     isBackgroundHidden: false,
     showLineNumbers: false,
-    codeThemePreset: "snippify-midnight",
+    codeThemePreset: "shotzly-midnight",
     codeLanguage: "javascript",
     uploadedImage: "",
     screenshotSettings: DEFAULT_SCREENSHOT_SETTINGS,
@@ -463,7 +463,7 @@ export const useEditorStore = create<EditorStore>((set) => {
     },
 
     // Code theme preset state
-    codeThemePreset: "snippify-midnight",
+    codeThemePreset: "shotzly-midnight",
     setCodeThemePreset: (codeThemePreset) => {
       const newState = {codeThemePreset};
       saveToLocalStorage(newState);

@@ -1,7 +1,7 @@
 {
-  "name": "snippify",
+  "name": "shotzly",
   "version": "2.0.0",
-  "description": "Snippify v2 - Free Code Snippet Tools Suite with Enhanced Code Editor and Professional Screenshot Generator",
+  "description": "Shotzly v2 - Free Code Snippet Tools Suite with Enhanced Code Editor and Professional Screenshot Generator",
   "private": true,
   "scripts": {
     "dev": "next dev",

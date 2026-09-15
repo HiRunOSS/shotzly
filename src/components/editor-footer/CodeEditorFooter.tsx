@@ -14,21 +14,21 @@ import BackgroundSelect from "./BackgroundSelect";
 
 const CODE_PADDING_OPTIONS = [4, 8, 16, 32, 64, 128];
 const CODE_THEME_PRESETS = [
-  {value: "snippify-midnight", label: "Midnight"},
-  {value: "snippify-sand", label: "Sand"},
-  {value: "snippify-emerald-night", label: "Forest"},
-  {value: "snippify-carbon", label: "Mono"},
-  {value: "snippify-github-dark", label: "Breeze"},
-  {value: "snippify-candy", label: "Candy"},
-  {value: "snippify-crimson", label: "Crimson"},
-  {value: "snippify-falcon", label: "Falcon"},
-  {value: "snippify-meadow", label: "Meadow"},
-  {value: "snippify-raindrop", label: "Raindrop"},
-  {value: "snippify-sunset", label: "Sunset"},
-  {value: "snippify-bitmap", label: "Bitmap"},
-  {value: "snippify-ice", label: "Ice"},
-  {value: "snippify-noir", label: "Noir"},
-  {value: "snippify-porcelain", label: "Porcelain (Light)"},
+  {value: "shotzly-midnight", label: "Midnight"},
+  {value: "shotzly-sand", label: "Sand"},
+  {value: "shotzly-emerald-night", label: "Forest"},
+  {value: "shotzly-carbon", label: "Mono"},
+  {value: "shotzly-github-dark", label: "Breeze"},
+  {value: "shotzly-candy", label: "Candy"},
+  {value: "shotzly-crimson", label: "Crimson"},
+  {value: "shotzly-falcon", label: "Falcon"},
+  {value: "shotzly-meadow", label: "Meadow"},
+  {value: "shotzly-raindrop", label: "Raindrop"},
+  {value: "shotzly-sunset", label: "Sunset"},
+  {value: "shotzly-bitmap", label: "Bitmap"},
+  {value: "shotzly-ice", label: "Ice"},
+  {value: "shotzly-noir", label: "Noir"},
+  {value: "shotzly-porcelain", label: "Porcelain (Light)"},
 ];
 
 const CODE_LANGUAGES = [

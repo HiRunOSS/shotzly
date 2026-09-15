@@ -19,13 +19,13 @@ import {
 export const metadata: Metadata = {
   title: "Free Code Snippet Generator, Keyboard for Code & Screenshot Editor",
   description:
-    "Snippify helps developers create beautiful code snippet images, keyboard-style code visuals, and polished screenshots for docs, blogs, GitHub, X, LinkedIn, and presentations.",
+    "Shotzly helps developers create beautiful code snippet images, keyboard-style code visuals, and polished screenshots for docs, blogs, GitHub, X, LinkedIn, and presentations.",
   keywords: coreKeywords,
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Snippify - Free Code Snippet Generator & Screenshot Editor",
+    title: "Shotzly - Free Code Snippet Generator & Screenshot Editor",
     description:
       "Generate code snippet screenshots with syntax highlighting, themes, gradients, and export controls. Edit screenshots with frames, shadows, blur, and aspect ratios.",
     url: SITE_URL,
@@ -34,13 +34,13 @@ export const metadata: Metadata = {
         url: DEFAULT_OG_IMAGE,
         width: 1920,
         height: 990,
-        alt: "Snippify code snippet generator preview",
+        alt: "Shotzly code snippet generator preview",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Snippify - Free Code Snippet Generator",
+    title: "Shotzly - Free Code Snippet Generator",
     description:
       "Create code snippet images, keyboard-style code screenshots, and polished screenshot visuals online.",
     images: [absoluteUrl(DEFAULT_OG_IMAGE)],
@@ -80,10 +80,10 @@ const faqSchema = {
   mainEntity: [
     {
       "@type": "Question",
-      name: "What is Snippify?",
+      name: "What is Shotzly?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Snippify is a free online code snippet generator and screenshot editor for creating shareable developer visuals.",
+        text: "Shotzly is a free online code snippet generator and screenshot editor for creating shareable developer visuals.",
       },
     },
     {
@@ -91,12 +91,12 @@ const faqSchema = {
       name: "Can I generate code screenshots with syntax highlighting?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes. Snippify supports syntax-highlighted code snippets with themes, backgrounds, window styles, and export controls.",
+        text: "Yes. Shotzly supports syntax-highlighted code snippets with themes, backgrounds, window styles, and export controls.",
       },
     },
     {
       "@type": "Question",
-      name: "Can I edit screenshots in Snippify?",
+      name: "Can I edit screenshots in Shotzly?",
       acceptedAnswer: {
         "@type": "Answer",
         text: "Yes. The screenshot editor lets you upload or capture screenshots, apply gradients, frames, shadows, blur, aspect ratios, and export polished images.",
@@ -125,17 +125,17 @@ function SeoFeatureSection() {
   ];
   const faqs = [
     {
-      question: "What is Snippify?",
+      question: "What is Shotzly?",
       answer:
-        "Snippify is a free online code snippet generator and screenshot editor for creating shareable developer visuals.",
+        "Shotzly is a free online code snippet generator and screenshot editor for creating shareable developer visuals.",
     },
     {
       question: "Can I generate code screenshots with syntax highlighting?",
       answer:
-        "Yes. Snippify supports syntax-highlighted code snippets with themes, backgrounds, window styles, and export controls.",
+        "Yes. Shotzly supports syntax-highlighted code snippets with themes, backgrounds, window styles, and export controls.",
     },
     {
-      question: "Can I edit screenshots in Snippify?",
+      question: "Can I edit screenshots in Shotzly?",
       answer:
         "Yes. The screenshot editor lets you upload or capture screenshots, apply gradients, frames, shadows, blur, aspect ratios, and export polished images.",
     },
@@ -153,7 +153,7 @@ function SeoFeatureSection() {
               Make code snippets and screenshots ready to share.
             </h2>
             <p className="mt-4 text-base leading-7 text-gray-600 dark:text-gray-300">
-              Snippify combines a code snippet generator, a keyboard-style code
+              Shotzly combines a code snippet generator, a keyboard-style code
               visual tool, and a screenshot editor in one fast browser
               workspace.
             </p>

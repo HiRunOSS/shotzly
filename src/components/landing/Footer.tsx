@@ -2,18 +2,37 @@
 
 import Link from "next/link";
 
+export function MakeItLastBadge() {
+  return (
+    <a
+      href="https://www.makeitla.st/"
+      title="Featured on MakeItLast"
+      target="_blank"
+      rel="noreferrer"
+    >
+      <img
+        src="https://www.makeitla.st/badge/makeitlast-badge-light-amber.svg?v=3"
+        alt="Featured on MakeItLast"
+        width={252}
+        height={76}
+        className="h-8 w-auto"
+      />
+    </a>
+  );
+}
+
 export default function LandingFooter() {
   const footerLinks = [
     {
       label: "Contributing",
-      href: "https://github.com/hiarun02/snippify/blob/main/CONTRIBUTING.md",
+      href: "https://github.com/HiRunOSS/shotzly/blob/main/CONTRIBUTING.md",
     },
 
     {
       label: "Report Issue",
-      href: "https://github.com/hiarun02/snippify/issues",
+      href: "https://github.com/HiRunOSS/shotzly/issues",
     },
-    {label: "GitHub", href: "https://github.com/hiarun02/snippify"},
+    {label: "GitHub", href: "https://github.com/HiRunOSS/shotzly"},
   ];
 
   return (
@@ -22,7 +41,7 @@ export default function LandingFooter() {
         <div className="flex flex-col items-center justify-center gap-3 text-center">
           <div className="text-sm text-gray-700 dark:text-gray-300">
             <span className="font-semibold text-gray-900 dark:text-gray-100">
-              Snippify
+              Shotzly
             </span>{" "}
             © 2026
           </div>
@@ -50,20 +69,20 @@ export default function LandingFooter() {
 
           <div className="flex flex-wrap items-center justify-center gap-2">
             <a
-              href="https://www.scrolllaunch.com/products/snippify?ref=badge"
+              href="https://www.scrolllaunch.com/products/shotzly?ref=badge"
               target="_blank"
               rel="noreferrer"
-              aria-label="Snippify - Featured on ScrollLaunch"
+              aria-label="Shotzly - Featured on ScrollLaunch"
             >
               <img
-                src="https://www.scrolllaunch.com/api/badge/snippify?variant=launched&theme=light"
-                alt="Snippify - Featured on ScrollLaunch"
+                src="https://www.scrolllaunch.com/api/badge/shotzly?variant=launched&theme=light"
+                alt="Shotzly - Featured on ScrollLaunch"
                 className="h-8 w-auto"
               />
             </a>
 
             <a
-              href="https://twelve.tools/snippify-live"
+              href="https://twelve.tools/shotzly-live"
               target="_blank"
               rel="noreferrer"
               aria-label="Featured on Twelve Tools"
@@ -76,6 +95,7 @@ export default function LandingFooter() {
                 className="h-8 w-auto"
               />
             </a>
+            <MakeItLastBadge />
           </div>
 
           <div className="text-xs text-gray-500 dark:text-gray-400">

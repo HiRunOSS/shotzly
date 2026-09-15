@@ -14,7 +14,7 @@ export default function Hero() {
     const fetchStars = async () => {
       try {
         const res = await fetch(
-          "https://api.github.com/repos/hiarun02/snippify",
+          "https://api.github.com/repos/HiRunOSS/shotzly",
         );
         if (!res.ok) {
           throw new Error(`GitHub API error: ${res.status}`);
@@ -58,11 +58,11 @@ export default function Hero() {
             </span>
           </div>
           <h1 className="text-4xl font-extrabold leading-tight text-gray-900 dark:text-white sm:text-5xl">
-            Snippify: Code & Screenshot to Stunning Visuals
+            Shotzly: Code & Screenshot to Stunning Visuals
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 sm:text-xl">
             Transform your code and screenshots into stunning visuals with
-            Snippify.
+            Shotzly.
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export default function Hero() {
             asChild
           >
             <Link
-              href="https://github.com/hiarun02/snippify"
+              href="https://github.com/HiRunOSS/shotzly"
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-2"

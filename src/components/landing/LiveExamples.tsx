@@ -8,12 +8,12 @@ const SWITCH_INTERVAL = 4200;
 const editorShots = [
   {
     src: "/sample-img/editor1.png",
-    alt: "Snippify code editor mode with a styled code export preview",
+    alt: "Shotzly code editor mode with a styled code export preview",
     label: "Code editor preview",
   },
   {
     src: "/sample-img/editor2.png",
-    alt: "Snippify screenshot editor mode with an image upload preview",
+    alt: "Shotzly screenshot editor mode with an image upload preview",
     label: "Screenshot editor preview",
   },
 ];

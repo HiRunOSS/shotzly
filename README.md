@@ -1,5 +1,5 @@
 
-# Snippify - Free Code Snippet & Screenshot Generator
+# Shotzly - Free Code Snippet & Screenshot Generator
 
 An all-in-one tool to generate, customize, and share beautiful code and screenshot snippets.
 
@@ -42,8 +42,8 @@ An all-in-one tool to generate, customize, and share beautiful code and screensh
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/hiarun02/snippify.git
-cd snippify
+git clone https://github.com/HiRunOSS/shotzly.git
+cd shotzly
 ```
 
 2. **Install dependencies**
@@ -138,7 +138,7 @@ This project is open source and available under the Apache License 2.0 - see the
 
 ## 👥 Contributors
 
-Thanks to all our amazing contributors! Check out the [Contributors page](https://github.com/hiarun02/snippify/graphs/contributors) for more details.
+Thanks to all our amazing contributors! Check out the [Contributors page](https://github.com/HiRunOSS/shotzly/graphs/contributors) for more details.
 
 ## 👨‍💻 Creator
 

@@ -34,63 +34,63 @@ const LIGHT_EDITOR_SURFACE = "#F9FAFB";
 
 const CODE_THEMES: CodeThemeDefinition[] = [
   {
-    id: "snippify-midnight",
+    id: "shotzly-midnight",
     palette: {foreground: "#FFFFFF", constant: "#9681C2", string: "#6D86A4", comment: "#4A4C56", keyword: "#7DA9AB", parameter: "#51D0F8", function: "#51D0F8", stringExpression: "#6D86A4", punctuation: "#7DA9AB", link: "#7DA9AB", number: "#75D2B1", property: "#9681C2"},
   },
   {
-    id: "snippify-sand",
+    id: "shotzly-sand",
     palette: {foreground: "#FFFFFF", constant: "#C2B181", string: "#C2B181", comment: "#837E77", keyword: "#D3B48C", parameter: "#F4A361", function: "#F4A361", stringExpression: "#EED5B8", punctuation: "#F4A361", link: "#F4A361", number: "#C2B181", property: "#C2B181"},
   },
   {
-    id: "snippify-emerald-night",
+    id: "shotzly-emerald-night",
     palette: {foreground: "#FFFFFF", constant: "#6B8F71", string: "#C9C8BC", comment: "#555E56", keyword: "#AAB4A3", parameter: "#6B8F71", function: "#87B882", stringExpression: "#CCBD6E", punctuation: "#AAB4A3", link: "#AAB4A3", number: "#AAB4A3", property: "#C9C7BC"},
   },
   {
-    id: "snippify-carbon",
+    id: "shotzly-carbon",
     palette: {foreground: "#ffffff", constant: "#a7a7a7", string: "#a7a7a7", comment: "#666666", keyword: "#a7a7a7", parameter: "#a7a7a7", function: "#ffffff", stringExpression: "#a7a7a7", punctuation: "#a7a7a7", link: "#a7a7a7", number: "#ffffff", property: "#a7a7a7"},
   },
   {
-    id: "snippify-github-dark",
+    id: "shotzly-github-dark",
     palette: {foreground: "#FFFFFF", constant: "#49E8F2", string: "#E9AEFE", comment: "#8A757D", keyword: "#6599FF", parameter: "#F8518D", function: "#F8518D", stringExpression: "#E9AEFE", punctuation: "#F8518D", link: "#ECFEEF", number: "#55E7B2", property: "#49E8F2"},
   },
   {
-    id: "snippify-candy",
+    id: "shotzly-candy",
     palette: {foreground: "#FFFFFF", constant: "#1AC8FF", string: "#DFD473", comment: "#807796", keyword: "#FF659C", parameter: "#1AC8FF", function: "#73DFA5", stringExpression: "#DFD473", punctuation: "#FF659C", link: "#FF659C", number: "#7A7FFD", property: "#1AC8FF"},
   },
   {
-    id: "snippify-crimson",
+    id: "shotzly-crimson",
     palette: {foreground: "#FEFDFD", constant: "#D15510", string: "#EBB99D", comment: "#895E60", keyword: "#EB6F6F", parameter: "#C88E8E", function: "#C88E8E", stringExpression: "#EBB99D", punctuation: "#EB6F6F", link: "#EB6F6F", number: "#FDA97A", property: "#D15510"},
   },
   {
-    id: "snippify-falcon",
+    id: "shotzly-falcon",
     palette: {foreground: "#FFFFFF", constant: "#799DB1", string: "#6A8697", comment: "#6D7E88", keyword: "#9AB6B2", parameter: "#6D88BB", function: "#6D88BB", stringExpression: "#789083", punctuation: "#9AB6B2", link: "#9AB6B2", number: "#BD9C9C", property: "#799DB1"},
   },
   {
-    id: "snippify-meadow",
+    id: "shotzly-meadow",
     palette: {foreground: "#FFFFFF", constant: "#E4B165", string: "#E9EB9D", comment: "#708B6C", keyword: "#6DD79F", parameter: "#B3D767", function: "#B3D767", stringExpression: "#E9EB9D", punctuation: "#6DD79F", link: "#6DD79F", number: "#46B114", property: "#E4B165"},
   },
   {
-    id: "snippify-raindrop",
+    id: "shotzly-raindrop",
     palette: {foreground: "#E4F2FF", constant: "#008BB7", string: "#9DD8EB", comment: "#6C808B", keyword: "#2ED9FF", parameter: "#1AD6B5", function: "#1AD6B5", stringExpression: "#9DD8EB", punctuation: "#2ED9FF", link: "#2ED9FF", number: "#9984EE", property: "#008BB7"},
   },
   {
-    id: "snippify-sunset",
+    id: "shotzly-sunset",
     palette: {foreground: "#FFFFFF", constant: "#E978A1", string: "#F9D38C", comment: "#878572", keyword: "#FFAF65", parameter: "#E2D66B", function: "#E2D66B", stringExpression: "#F9D38C", punctuation: "#FFAF65", link: "#FFAF65", number: "#E7CF55", property: "#E978A1"},
   },
   {
-    id: "snippify-bitmap",
+    id: "shotzly-bitmap",
     palette: {foreground: "#FEFDFD", constant: "#E42B37", string: "#E42B37", comment: "#996B6D", keyword: "#EB6F6F", parameter: "#C88E8E", function: "#E42B37", stringExpression: "#EBB99D", punctuation: "#EB6F6F", link: "#EB6F6F", number: "#E42B37", property: "#E42B37"},
   },
   {
-    id: "snippify-ice",
+    id: "shotzly-ice",
     palette: {foreground: "#FFFFFF", constant: "#92DEF6", string: "#92DEF6", comment: "#5C6A70", keyword: "#BFC4C9", parameter: "#778CB6", function: "#778CB6", stringExpression: "#89C3DC", punctuation: "#778CB6", link: "#778CB6", number: "#00B0E9", property: "#00B0E9"},
   },
   {
-    id: "snippify-noir",
+    id: "shotzly-noir",
     palette: {foreground: "#ffffff", constant: "#a7a7a7", string: "#a7a7a7", comment: "#666666", keyword: "#a7a7a7", parameter: "#a7a7a7", function: "#ffffff", stringExpression: "#a7a7a7", punctuation: "#a7a7a7", link: "#a7a7a7", number: "#ffffff", property: "#a7a7a7"},
   },
   {
-    id: "snippify-porcelain",
+    id: "shotzly-porcelain",
     light: true,
     palette: {foreground: "#434447", constant: "#766599", string: "#5F758F", comment: "#78808C", keyword: "#587678", parameter: "#2F788F", function: "#2F788F", stringExpression: "#5F758F", punctuation: "#587678", link: "#5A797A", number: "#2D8264", property: "#766599"},
   },

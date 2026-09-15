@@ -1,4 +1,4 @@
-# Contributing to Snippify
+# Contributing to Shotzly
 
 Thanks for your interest in contributing! This guide explains how to propose changes, report issues, and submit pull requests.
 

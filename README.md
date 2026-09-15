@@ -1,7 +1,7 @@
 
 # Shotzly - Free Code Snippet & Screenshot Generator
 
-An all-in-one tool to generate, customize, and share beautiful code and screenshot snippets.
+A web based tool to generate, customize, and share beautiful code and screenshot snippets.
 
 <img width="4096" height="2304" alt="shotzly-screenshot-4k" src="https://github.com/user-attachments/assets/0b1184fe-cc9c-4403-a0a3-e4ebf46ec6f2" />
 

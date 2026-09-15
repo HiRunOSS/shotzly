@@ -32,6 +32,9 @@ export interface ScreenshotSettings {
   cornerRadius: number;
   borderWidth: number;
   imageScale: number;
+  offsetX: number;
+  offsetY: number;
+  rotation: number;
   backgroundBlur: number;
   shadowStyle: "none" | "hug" | "soft" | "strong";
   layoutPreset: ScreenshotLayoutPreset;
@@ -158,6 +161,9 @@ const DEFAULT_SCREENSHOT_SETTINGS: ScreenshotSettings = {
   cornerRadius: 16,
   borderWidth: 4,
   imageScale: 100,
+  offsetX: 0,
+  offsetY: 0,
+  rotation: 0,
   backgroundBlur: 0,
   shadowStyle: "none",
   layoutPreset: DEFAULT_LAYOUT_PRESET,
@@ -219,7 +225,7 @@ const normalizeScreenshotSettings = (
   const rawBackgroundBlur = Number(settings?.backgroundBlur);
   const imageScale =
     Number.isFinite(rawImageScale) && rawImageScale >= 50 && rawImageScale <= 150
-      ? rawImageScale
+      ? Math.round(rawImageScale)
       : DEFAULT_SCREENSHOT_SETTINGS.imageScale;
 
   return {
@@ -242,6 +248,9 @@ const normalizeScreenshotSettings = (
           }
         })(),
     imageScale,
+    offsetX: Number.isFinite(settings?.offsetX) ? Math.max(-45, Math.min(45, settings!.offsetX!)) : 0,
+    offsetY: Number.isFinite(settings?.offsetY) ? Math.max(-45, Math.min(45, settings!.offsetY!)) : 0,
+    rotation: Number.isFinite(settings?.rotation) ? ((settings!.rotation! % 360) + 360) % 360 : 0,
     backgroundBlur: Number.isFinite(rawBackgroundBlur)
       ? Math.max(0, Math.min(24, rawBackgroundBlur))
       : DEFAULT_SCREENSHOT_SETTINGS.backgroundBlur,

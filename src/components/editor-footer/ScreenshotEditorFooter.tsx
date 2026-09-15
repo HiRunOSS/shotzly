@@ -66,7 +66,7 @@ const SCREENSHOT_ASPECT_OPTIONS: Array<{
 ];
 
 const clampImageScale = (value: number) => {
-  return Number.isFinite(value) && value >= 50 && value <= 150 ? value : 100;
+  return Number.isFinite(value) && value >= 50 && value <= 150 ? Math.round(value) : 100;
 };
 
 const clampCornerRadius = (value: number) => {

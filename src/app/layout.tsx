@@ -57,9 +57,10 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     images: [
       {
-        url: DEFAULT_OG_IMAGE,
-        width: 1920,
-        height: 990,
+        url: absoluteUrl(DEFAULT_OG_IMAGE),
+        width: 4096,
+        height: 2304,
+        type: "image/png",
         alt: "Shotzly code snippet generator and screenshot editor preview",
       },
     ],

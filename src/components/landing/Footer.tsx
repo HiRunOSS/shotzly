@@ -4,19 +4,9 @@ import Link from "next/link";
 
 export function MakeItLastBadge() {
   return (
-    <a
-      href="https://www.makeitla.st/tools/shotzly"
-      title="Featured on MakeItLast"
-      target="_blank"
-      rel="noreferrer"
-    >
-      <img
-        src="https://www.makeitla.st/badge/makeitlast-badge-light-amber.svg?v=3"
-        alt="Featured on MakeItLast"
-        width={252}
-        height={76}
-        className="h-6 w-auto"
-      />
+    <a href="https://www.makeitla.st/" title="Featured on MakeItLast">
+      <img src="https://www.makeitla.st/badge/makeitlast-badge-light.svg?v=3"
+        alt="Featured on MakeItLast" width={252} height={76} className="h-6 w-auto" />
     </a>
   );
 }

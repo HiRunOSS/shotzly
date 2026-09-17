@@ -52,6 +52,7 @@ const createExportClone = (node: HTMLElement) => {
   wrapper.style.pointerEvents = "none";
 
   const clone = node.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll("[data-export-ignore='true']").forEach((element) => element.remove());
   applySharpBorderExportFix(clone);
   clone.style.width = `${width}px`;
   clone.style.height = `${height}px`;
@@ -128,28 +129,25 @@ export async function saveNodeAsSvg(node: HTMLElement, filename = "code.svg") {
 }
 
 export async function copyNodeAsImage(node: HTMLElement) {
-  const {toBlob, toPng} = await import("html-to-image");
-  const {clone, dispose} = createExportClone(node);
-
-  try {
-    const blob = await toBlob(clone, {
-      ...getBaseOptions(clone),
-      quality: 1,
-      pixelRatio: EXPORT_PIXEL_RATIO,
-    });
-
-    if (blob && navigator.clipboard && "write" in navigator.clipboard) {
-      await navigator.clipboard.write([new ClipboardItem({[blob.type]: blob})]);
-      return;
+  return writeImageToClipboard(async () => {
+    const {toBlob} = await import("html-to-image");
+    const {clone, dispose} = createExportClone(node);
+    try {
+      const blob = await toBlob(clone, {
+        ...getBaseOptions(clone), quality: 1, pixelRatio: EXPORT_PIXEL_RATIO,
+      });
+      if (!blob) throw new Error("Could not create the image.");
+      return blob;
+    } finally {
+      dispose();
     }
+  });
+}
 
-    const fallbackPng = await toPng(clone, {
-      ...getBaseOptions(clone),
-      quality: 1,
-      pixelRatio: EXPORT_PIXEL_RATIO,
-    });
-    downloadDataUrl(fallbackPng, "code.png");
-  } finally {
-    dispose();
+export async function writeImageToClipboard(render: () => Promise<Blob>) {
+  if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
+    throw new Error("Image copying is unavailable. Download the image instead.");
   }
+  // Pass a promise immediately to preserve the click's user activation in Safari.
+  await navigator.clipboard.write([new ClipboardItem({"image/png": render()})]);
 }

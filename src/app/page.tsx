@@ -1,4 +1,4 @@
-import type {Metadata} from "next";
+import type { Metadata } from "next";
 import Hero from "@/components/landing/Hero";
 import Navbar from "@/components/landing/Navbar";
 import LandingFooter from "@/components/landing/Footer";
@@ -19,7 +19,7 @@ import {
 export const metadata: Metadata = {
   title: "Free Code Snippet Generator, Keyboard for Code & Screenshot Editor",
   description:
-    "Shotzly helps developers create beautiful code snippet images, keyboard-style code visuals, and polished screenshots for docs, blogs, GitHub, X, LinkedIn, and presentations.",
+    "Shotzly is a free online code snippet generator and screenshot editor built for developers who want to create clean, beautiful, and shareable visuals in seconds.",
   keywords: coreKeywords,
   alternates: {
     canonical: "/",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Shotzly - Free Code Snippet Generator & Screenshot Editor",
     description:
-      "Generate code snippet screenshots with syntax highlighting, themes, gradients, and export controls. Edit screenshots with frames, shadows, blur, and aspect ratios.",
+      "Shotzly is a free online code snippet generator and screenshot editor built for developers who want to create clean, beautiful, and shareable visuals in seconds.",
     url: SITE_URL,
     images: [
       {
@@ -35,15 +35,15 @@ export const metadata: Metadata = {
         width: 4096,
         height: 2304,
         type: "image/png",
-        alt: "Shotzly code snippet generator preview",
+        alt: "Shotzly - Free Code Snippet Generator & Screenshot Editor",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Shotzly - Free Code Snippet Generator",
+    title: "Shotzly - Free Code Snippet Generator & Screenshot Editor",
     description:
-      "Create code snippet images, keyboard-style code screenshots, and polished screenshot visuals online.",
+      "Shotzly is a free online code snippet generator and screenshot editor built for developers who want to create clean, beautiful, and shareable visuals in seconds.",
     images: [absoluteUrl(DEFAULT_OG_IMAGE)],
   },
 };
@@ -109,26 +109,26 @@ const faqSchema = {
 function SeoFeatureSection() {
   const features = [
     {
-      title: "Code Snippet Generator",
+      title: "Make your code the story.",
       description:
         "Paste code, choose a language, apply syntax highlighting, and export clean code screenshots for documentation, blogs, GitHub README files, and social posts.",
     },
     {
-      title: "Keyboard for Code",
+      title: "Bring the whole picture.",
       description:
-        "Create keyboard-style code visuals with polished window chrome, spacing, background gradients, and layout controls that make snippets easier to read and share.",
+        "Arrange multiple screenshots on one background. Give each image its own position, frame, and finishing touches.",
     },
     {
-      title: "Screenshot Editor",
+      title: "Point out what matters.",
       description:
-        "Upload or capture screenshots, then add frames, rounded corners, shadows, blur, aspect ratios, and export-ready backgrounds without opening a design app.",
+        "Crop the distractions, annotate the details, hide private information, or add a little personality with a sticker.",
     },
   ];
   const faqs = [
     {
       question: "What is Shotzly?",
       answer:
-        "Shotzly is a free online code snippet generator and screenshot editor for creating shareable developer visuals.",
+        "Shotzly is a free online code snippet generator and screenshot editor built for developers who want to create clean, beautiful, and shareable visuals in seconds.",
     },
     {
       question: "Can I generate code screenshots with syntax highlighting?",
@@ -143,33 +143,28 @@ function SeoFeatureSection() {
   ];
 
   return (
-    <section className="bg-white py-14 dark:bg-[#111010] sm:py-16">
+    <section className="bg-[#111010] py-14 text-white sm:py-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="grid gap-10">
           <div>
-            <p className="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400">
-              Developer image tools
+            <p className="text-xs font-semibold uppercase text-white/60">
+              THE DETAILS MAKE THE DIFFERENCE
             </p>
-            <h2 className="mt-3 text-3xl font-bold text-gray-950 dark:text-white sm:text-4xl">
-              Make code snippets and screenshots ready to share.
+            <h2 className="mt-3 text-3xl font-medium text-white sm:text-4xl">
+              A finishing touch for every idea.
             </h2>
-            <p className="mt-4 text-base leading-7 text-gray-600 dark:text-gray-300">
-              Shotzly combines a code snippet generator, a keyboard-style code
-              visual tool, and a screenshot editor in one fast browser
-              workspace.
-            </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+          <div className="grid gap-8 sm:grid-cols-3">
             {features.map((feature) => (
               <article
                 key={feature.title}
-                className="rounded-lg border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-white/[0.04]"
+                className="border-t border-white/15 pt-5"
               >
-                <h3 className="text-lg font-semibold text-gray-950 dark:text-white">
+                <h3 className="text-lg font-medium text-white">
                   {feature.title}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
+                <p className="mt-2 text-sm leading-6 text-white/50">
                   {feature.description}
                 </p>
               </article>
@@ -177,13 +172,13 @@ function SeoFeatureSection() {
           </div>
         </div>
 
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
+        <div className="mt-16 grid gap-8 border-t border-white/10 pt-10 md:grid-cols-3">
           {faqs.map((faq) => (
             <article key={faq.question}>
-              <h3 className="text-base font-semibold text-gray-950 dark:text-white">
+              <h3 className="text-base font-medium text-white">
                 {faq.question}
               </h3>
-              <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
+              <p className="mt-2 text-sm leading-6 text-white/50">
                 {faq.answer}
               </p>
             </article>
@@ -196,7 +191,7 @@ function SeoFeatureSection() {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-white to-gray-50 dark:from-[#111010] dark:via-[#111010] dark:to-[#111010]">
+    <div className="min-h-screen bg-[#111010]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -204,7 +199,7 @@ export default function Home() {
         }}
       />
       <Navbar />
-      <main className="flex min-h-screen flex-col justify-between pb-0">
+      <main className="flex min-h-screen flex-col pb-0">
         <Hero />
         <LiveExamples />
         <SeoFeatureSection />

@@ -3,6 +3,7 @@
 import {useEffect, useState} from "react";
 import CodeSnippet from "@/components/CodeSnippet";
 import ScreenshotSnippet from "@/components/ScreenshotSnippet";
+import ScreenshotMarkup from "@/components/ScreenshotMarkup";
 import CodeEditorFooter from "@/components/editor-footer/CodeEditorFooter";
 import ScreenshotEditorFooter from "@/components/editor-footer/ScreenshotEditorFooter";
 import {Button} from "@/components/ui/button";
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import {useEditorStore} from "@/store/useEditorStore";
 import exportAsImage, {
+  screenshotToBlob,
   type ImageExportFormat,
   type ImageExportResolution,
 } from "@/utils/DownloadImage";
@@ -30,8 +32,9 @@ import {
   copyNodeAsImage,
   saveNodeAsPng,
   saveNodeAsSvg,
+  writeImageToClipboard,
 } from "@/utils/snippetExport";
-import {Copy, Download, ImageIcon, Trash2} from "lucide-react";
+import {Check, Copy, Download, ImageIcon, ImagePlus, Loader2, Redo2, Trash2, Undo2} from "lucide-react";
 import {FaGithub} from "react-icons/fa6";
 
 const X_PROFILE_URL = "https://x.com/hiarun02";
@@ -58,14 +61,67 @@ export default function EditorPageClient() {
   const screenshotSettings = useEditorStore(
     (state) => state.screenshotSettings,
   );
+  const selectedImage = useEditorStore((state) => state.canvasImages.find((image) => image.id === state.selectedCanvasImageId));
+  const setCanvasImages = useEditorStore((state) => state.setCanvasImages);
+  const selectedSettings = selectedImage?.settings ?? screenshotSettings;
   const setScreenshotSettings = useEditorStore(
     (state) => state.setScreenshotSettings,
   );
   const uploadedImage = useEditorStore((state) => state.uploadedImage);
+  const hasExtraImages = useEditorStore((state) => state.canvasImages.length > 0);
   const setUploadedImage = useEditorStore((state) => state.setUploadedImage);
   const previewRef = useEditorStore((state) => state.previewRef);
   const isExporting = useEditorStore((state) => state.isExporting);
   const setIsExporting = useEditorStore((state) => state.setIsExporting);
+  const canUndo = useEditorStore((state) => state.canUndo);
+  const canRedo = useEditorStore((state) => state.canRedo);
+  const undo = useEditorStore((state) => state.undo);
+  const redo = useEditorStore((state) => state.redo);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copying" | "copied" | "error">("idle");
+  const [copyError, setCopyError] = useState("");
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (target instanceof HTMLElement && target.closest("input, textarea, select, [contenteditable='true'], [role='dialog']")) return;
+      if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+      if (event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        if (event.shiftKey) redo(); else undo();
+      } else if (event.key.toLowerCase() === "y") {
+        event.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [undo, redo]);
+
+  useEffect(() => {
+    if (copyStatus !== "copied") return;
+    const timer = setTimeout(() => setCopyStatus("idle"), 2500);
+    return () => clearTimeout(timer);
+  }, [copyStatus]);
+
+  const copyImage = async () => {
+    if (!previewRef || isExporting) return;
+    setCopyStatus("copying");
+    setCopyError("");
+    setIsExporting(true);
+    try {
+      if (editorMode !== "code") {
+        await writeImageToClipboard(() => screenshotToBlob(previewRef, screenshotExportResolution));
+      } else {
+        await copyNodeAsImage(previewRef);
+      }
+      setCopyStatus("copied");
+    } catch {
+      setCopyStatus("error");
+      setCopyError("Could not copy the image. Check clipboard permission or download it instead.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   useEffect(() => {
     hydrateFromStorage();
@@ -169,8 +225,8 @@ export default function EditorPageClient() {
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-gradient-to-b from-white via-white to-gray-50 dark:from-[#111010] dark:via-[#111010] dark:to-[#111010]">
       <header className="fixed inset-x-0 top-3 z-20 px-3 sm:top-6 sm:px-6">
-        <div className="mx-auto grid w-full grid-cols-[1fr_auto] gap-2 sm:grid-cols-[1fr_auto_1fr] sm:items-start sm:gap-20 lg:gap-32 xl:gap-44">
-          <div className="order-3 col-span-2 rounded-2xl bg-white/40 p-2 backdrop-blur-2xl dark:bg-[#111010]/70 sm:order-none sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:w-[min(460px,32vw)] xl:w-[min(560px,34vw)]">
+        <div className="mx-auto grid w-full grid-cols-1 items-start gap-2 min-[1400px]:grid-cols-[1fr_460px_1fr]">
+          <div className="order-2 mx-auto w-full max-w-[460px] rounded-2xl bg-white/40 p-2 backdrop-blur-2xl dark:bg-[#111010]/70 min-[1400px]:order-none min-[1400px]:col-start-2 min-[1400px]:row-start-1">
             <div className="flex w-full items-center justify-center">
               <Button
                 type="button"
@@ -179,7 +235,7 @@ export default function EditorPageClient() {
                 className={`h-9 flex-1 rounded-xl border text-sm transition-colors hover:border-white hover:bg-white hover:text-black ${
                   editorMode === "screenshot"
                     ? "border-white bg-white text-black shadow-sm"
-                    : "border-transparent text-gray-800 hover:shadow-sm dark:text-white"
+                    : "border-transparent text-gray-800 hover:shadow-sm dark:text-white dark:hover:text-black"
                 }`}
                 onClick={() => setEditorMode("screenshot")}
               >
@@ -192,7 +248,7 @@ export default function EditorPageClient() {
                 className={`h-9 flex-1 rounded-xl border text-sm transition-colors hover:border-white hover:bg-white hover:text-black ${
                   editorMode === "code"
                     ? "border-white bg-white text-black shadow-sm"
-                    : "border-transparent text-gray-800 hover:shadow-sm dark:text-white"
+                    : "border-transparent text-gray-800 hover:shadow-sm dark:text-white dark:hover:text-black"
                 }`}
                 onClick={() => setEditorMode("code")}
               >
@@ -201,8 +257,8 @@ export default function EditorPageClient() {
             </div>
           </div>
 
-          <div className="contents sm:col-start-3 sm:row-start-1 sm:flex sm:justify-end sm:gap-3">
-            <div className="flex w-fit items-center gap-1.5 rounded-xl border border-black/10 bg-white/35 p-1 text-gray-900 shadow-sm backdrop-blur-2xl dark:border-white/10 dark:bg-[#111010]/65 dark:text-white sm:order-2">
+          <div className="flex w-full justify-between gap-2 min-[1400px]:contents">
+            <div className="hidden w-fit items-center gap-1.5 rounded-xl border border-black/10 bg-white/35 p-1 text-gray-900 shadow-sm backdrop-blur-2xl dark:border-white/10 dark:bg-[#111010]/65 dark:text-white sm:flex min-[1400px]:col-start-1 min-[1400px]:row-start-1">
               <a
                 href={GITHUB_REPO_URL}
                 target="_blank"
@@ -230,12 +286,21 @@ export default function EditorPageClient() {
               </a>
             </div>
 
-            <div className="ml-auto flex w-fit items-center gap-1.5 rounded-xl border border-black/10 bg-white/35 p-0.5 text-gray-900 shadow-sm backdrop-blur-2xl dark:border-white/10 dark:bg-[#111010]/65 dark:text-white sm:order-1 sm:ml-0">
-              {editorMode === "screenshot" && uploadedImage ? (
+            <div className="ml-auto flex w-fit flex-wrap items-center gap-0.5 rounded-xl border border-black/10 bg-white/35 p-0.5 text-gray-900 shadow-sm backdrop-blur-2xl dark:border-white/10 dark:bg-[#111010]/65 dark:text-white min-[1400px]:col-start-3 min-[1400px]:row-start-1">
+              <button type="button" aria-label="Undo" title="Undo" disabled={!canUndo || isExporting} onClick={undo} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5 disabled:opacity-35 dark:hover:bg-white/10"><Undo2 size={16} /></button>
+              <button type="button" aria-label="Redo" title="Redo" disabled={!canRedo || isExporting} onClick={redo} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5 disabled:opacity-35 dark:hover:bg-white/10"><Redo2 size={16} /></button>
+              {editorMode === "screenshot" && <ScreenshotMarkup />}
+              {editorMode === "screenshot" && (uploadedImage || hasExtraImages) && <button type="button" title="Add screenshots" aria-label="Add screenshots" onClick={() => document.getElementById("additional-screenshot-files")?.click()} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10"><ImagePlus size={16} /></button>}
+              <button type="button" aria-label={copyStatus === "copied" ? "Image copied" : "Copy image"} title={copyStatus === "copied" ? "Image copied" : "Copy image"} disabled={isExporting || !previewRef || (editorMode === "screenshot" && !uploadedImage && !hasExtraImages)} onClick={copyImage} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5 disabled:opacity-35 dark:hover:bg-white/10">
+                {copyStatus === "copying" ? <Loader2 size={16} className="animate-spin" /> : copyStatus === "copied" ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+              </button>
+              <span role="status" className="sr-only">{copyStatus === "copied" ? "Image copied to clipboard" : ""}</span>
+              {copyError && <p role="alert" className="absolute right-0 top-full mt-2 w-64 rounded-md bg-red-950 p-3 text-xs text-white">{copyError}</p>}
+              {editorMode === "screenshot" && (uploadedImage || selectedImage) ? (
                 <Button
                   type="button"
                   variant="ghost"
-                  onClick={() => setUploadedImage("")}
+                  onClick={() => selectedImage ? setCanvasImages(useEditorStore.getState().canvasImages.filter((image) => image.id !== selectedImage.id)) : setUploadedImage("")}
                   aria-label="Remove screenshot"
                   title="Remove screenshot"
                   className="h-8 w-8 rounded-lg px-0 text-gray-700 hover:bg-black/5 hover:text-black dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
@@ -403,8 +468,8 @@ export default function EditorPageClient() {
         </div>
       </header>
 
-      <main className="flex min-h-0 flex-1 items-center justify-center overflow-auto px-3 pb-28 pt-32 sm:px-4 sm:pb-32 sm:pt-28">
-        <div className="flex h-full w-full max-w-7xl items-center justify-center overflow-hidden rounded-2xl bg-white/20 backdrop-blur-2xl dark:bg-[#111010]/70 sm:rounded-3xl">
+      <main className="flex min-h-0 flex-1 items-center justify-center overflow-auto px-3 pb-28 pt-32 sm:px-4 sm:pb-32 sm:pt-36 min-[1400px]:pt-28">
+        <div className="flex h-full min-h-0 w-full min-w-0 max-w-7xl items-center justify-center overflow-hidden rounded-lg bg-white/20 backdrop-blur-2xl dark:bg-[#111010]/70">
           {editorMode === "code" ? (
             <CodeSnippet />
           ) : (
@@ -415,12 +480,17 @@ export default function EditorPageClient() {
 
       {editorMode === "code" ? (
         <CodeEditorFooter />
-      ) : (
+      ) : editorMode === "screenshot" ? (
         <ScreenshotEditorFooter
-          settings={screenshotSettings}
-          onSettingsChange={setScreenshotSettings}
+          settings={{...selectedSettings, aspectRatio: screenshotSettings.aspectRatio, backgroundBlur: screenshotSettings.backgroundBlur}}
+          onSettingsChange={(next) => {
+            if (selectedImage) {
+              setCanvasImages(useEditorStore.getState().canvasImages.map((image) => image.id === selectedImage.id ? {...image, settings: next} : image));
+              if (next.aspectRatio !== screenshotSettings.aspectRatio || next.backgroundBlur !== screenshotSettings.backgroundBlur) setScreenshotSettings({...screenshotSettings, aspectRatio: next.aspectRatio, backgroundBlur: next.backgroundBlur});
+            } else setScreenshotSettings(next);
+          }}
         />
-      )}
+      ) : null}
     </div>
   );
 }

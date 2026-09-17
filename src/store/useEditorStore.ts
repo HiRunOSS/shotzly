@@ -19,6 +19,7 @@ export type ScreenshotAspectRatio =
 
 export type ScreenshotLayoutPreset = LayoutPresetId;
 export type EditorMode = "code" | "screenshot";
+export type CanvasImage = {id: string; src: string; name: string; x: number; y: number; width: number; rotation: number; radius: number; shadow: boolean; settings?: ScreenshotSettings};
 export type CodeWindowStyle = "plain" | "macos" | "windows";
 export type ScreenshotBrowserStyle =
   | "none"
@@ -53,6 +54,14 @@ export interface ScreenshotSettings {
 type ScreenshotFrameStyle = ScreenshotSettings["frameStyle"];
 
 interface EditorStore {
+  selectedCanvasImageId: string | null;
+  selectCanvasImage: (id: string | null) => void;
+  canvasImages: CanvasImage[];
+  setCanvasImages: (images: CanvasImage[]) => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  undo: () => void;
+  redo: () => void;
   // Active editor
   editorMode: EditorMode;
   setEditorMode: (editorMode: EditorMode) => void;
@@ -122,6 +131,7 @@ interface EditorStore {
 }
 
 type PersistedEditorState = {
+  canvasImages: CanvasImage[];
   editorMode: EditorMode;
   code: string;
   fontSize: number;
@@ -224,7 +234,7 @@ const normalizeScreenshotSettings = (
   const rawImageScale = Number(settings?.imageScale);
   const rawBackgroundBlur = Number(settings?.backgroundBlur);
   const imageScale =
-    Number.isFinite(rawImageScale) && rawImageScale >= 50 && rawImageScale <= 150
+    Number.isFinite(rawImageScale) && rawImageScale >= 1 && rawImageScale <= 150
       ? Math.round(rawImageScale)
       : DEFAULT_SCREENSHOT_SETTINGS.imageScale;
 
@@ -296,12 +306,47 @@ const normalizeCodeWindowStyle = (value: unknown): CodeWindowStyle => {
     : "macos";
 };
 
-export const useEditorStore = create<EditorStore>((set) => {
+export const useEditorStore = create<EditorStore>((rawSet, get) => {
+  const past: PersistedEditorState[] = [];
+  const future: PersistedEditorState[] = [];
+  let lastEditKey = "";
+  let lastEditAt = 0;
+  const snapshot = (): PersistedEditorState => {
+    const state = get();
+    return Object.fromEntries(
+      Object.keys(getDefaultPersistedState()).map((key) => [key, state[key as keyof PersistedEditorState]]),
+    ) as PersistedEditorState;
+  };
+  const set: typeof rawSet = (patch) => {
+    // Hydration and transient UI updates must not enter document history.
+    if (typeof patch === "function") {
+      rawSet(patch);
+      return;
+    }
+    const current = snapshot();
+    const keys = Object.keys(patch).filter((key) => key in current && key !== "editorMode");
+    if (keys.some((key) => JSON.stringify(current[key as keyof PersistedEditorState]) !== JSON.stringify(patch[key as keyof EditorStore]))) {
+      const editKey = keys.sort().join(",");
+      const now = Date.now();
+      // Coalesce continuous slider/typing updates into one undo step.
+      if (editKey !== lastEditKey || now - lastEditAt > 500 || editKey === "uploadedImage") {
+        past.push(current);
+        if (past.length > 40) past.shift();
+      }
+      lastEditKey = editKey;
+      lastEditAt = now;
+      future.length = 0;
+      rawSet({...patch, canUndo: past.length > 0, canRedo: false});
+    } else {
+      rawSet(patch);
+    }
+  };
   let persistedCache: PersistedEditorState | null = null;
   let codeSaveTimeout: ReturnType<typeof setTimeout> | null = null;
   let pendingCodePatch: Partial<PersistedEditorState> = {};
 
   const getDefaultPersistedState = (): PersistedEditorState => ({
+    canvasImages: [],
     editorMode: "screenshot",
     code: DEFAULT_CODE,
     fontSize: 14,
@@ -391,6 +436,52 @@ export const useEditorStore = create<EditorStore>((set) => {
   };
 
   return {
+    canvasImages: [],
+    selectedCanvasImageId: null,
+    selectCanvasImage: (selectedCanvasImageId) => {
+      const images = get().canvasImages;
+      const image = images.find((item) => item.id === selectedCanvasImageId);
+      if (image && images[images.length - 1]?.id !== image.id) {
+        const canvasImages = [...images.filter((item) => item.id !== image.id), image];
+        saveToLocalStorage({canvasImages});
+        set({canvasImages});
+      }
+      rawSet({selectedCanvasImageId});
+    },
+    setCanvasImages: (canvasImages) => {
+      const patch = {canvasImages};
+      const selected = get().selectedCanvasImageId;
+      const selectedCanvasImageId = selected && !canvasImages.some((image) => image.id === selected)
+        ? (canvasImages[canvasImages.length - 1]?.id ?? null)
+        : selected;
+      saveToLocalStorage(patch);
+      set({...patch, selectedCanvasImageId});
+      lastEditKey = "";
+    },
+    canUndo: false,
+    canRedo: false,
+    undo: () => {
+      const previous = past.pop();
+      if (!previous) return;
+      future.push(snapshot());
+      if (codeSaveTimeout) clearTimeout(codeSaveTimeout);
+      pendingCodePatch = {};
+      lastEditKey = "";
+      persistedCache = previous;
+      writePersistedState(previous);
+      rawSet({...previous, selectedCanvasImageId: previous.canvasImages.some((image) => image.id === get().selectedCanvasImageId) ? get().selectedCanvasImageId : (previous.canvasImages[previous.canvasImages.length - 1]?.id ?? null), canUndo: past.length > 0, canRedo: true});
+    },
+    redo: () => {
+      const next = future.pop();
+      if (!next) return;
+      past.push(snapshot());
+      if (codeSaveTimeout) clearTimeout(codeSaveTimeout);
+      pendingCodePatch = {};
+      lastEditKey = "";
+      persistedCache = next;
+      writePersistedState(next);
+      rawSet({...next, selectedCanvasImageId: next.canvasImages.some((image) => image.id === get().selectedCanvasImageId) ? get().selectedCanvasImageId : (next.canvasImages[next.canvasImages.length - 1]?.id ?? null), canUndo: true, canRedo: future.length > 0});
+    },
     // Active editor state
     editorMode: "screenshot",
     setEditorMode: (editorMode) => {
@@ -560,6 +651,7 @@ export const useEditorStore = create<EditorStore>((set) => {
 
       set((state) => ({
         ...state,
+        canvasImages: Array.isArray(storedState.canvasImages) ? storedState.canvasImages.filter((image) => image && typeof image.src === "string" && image.src.startsWith("data:image/") && typeof image.id === "string" && [image.x, image.y, image.width, image.rotation, image.radius].every(Number.isFinite)).slice(0, 8) : [],
         editorMode: normalizedPersistedState.editorMode,
         code: normalizedPersistedState.code,
         fontSize: storedState.fontSize ?? state.fontSize,

@@ -1,108 +1,23 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
-import {FaArrowRight, FaStar} from "react-icons/fa";
-import {useEffect, useState} from "react";
-
-import {Button} from "@/components/ui/button";
+import {ArrowRight} from "lucide-react";
+import ExampleButton from "./ExampleButton";
+import launchPreview from "../../../public/examples/launch.png";
 
 export default function Hero() {
-  const [stars, setStars] = useState<number | null>(null);
-  const [displayStars, setDisplayStars] = useState(0);
-
-  useEffect(() => {
-    const fetchStars = async () => {
-      try {
-        const res = await fetch(
-          "https://api.github.com/repos/HiRunOSS/shotzly",
-        );
-        if (!res.ok) {
-          throw new Error(`GitHub API error: ${res.status}`);
-        }
-        const data = await res.json();
-        if (typeof data?.stargazers_count === "number") {
-          setStars(data.stargazers_count);
-        }
-      } catch (error) {
-        console.error("Failed to fetch stars", error);
-      }
-    };
-
-    fetchStars();
-  }, []);
-
-  useEffect(() => {
-    if (stars === null) return;
-    let current = 0;
-    const target = stars;
-    const step = Math.max(1, Math.floor(target / 40));
-    const interval = setInterval(() => {
-      current = Math.min(current + step, target);
-      setDisplayStars(current);
-      if (current >= target) clearInterval(interval);
-    }, 25);
-    return () => clearInterval(interval);
-  }, [stars]);
-
-  return (
-    <section
-      id="hero"
-      className="bg-white pb-14 pt-20 dark:bg-[#111010] sm:pb-12"
-    >
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-4 text-center">
-        <div className="space-y-4 sm:max-w-3xl">
-          {/* badge */}
-          <div>
-            <span className="mb-5 inline-block rounded-full bg-gray-100/60 px-3 py-1 text-sm font-medium dark:bg-amber-200/20 dark:text-amber-300">
-              Version 2.0.0
-            </span>
-          </div>
-          <h1 className="text-4xl font-extrabold leading-tight text-gray-900 dark:text-white sm:text-5xl">
-            Shotzly: Code & Screenshot to Stunning Visuals
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 sm:text-xl">
-            Transform your code and screenshots into stunning visuals with
-            Shotzly.
-          </p>
-        </div>
-
-        <div className="flex w-full flex-col items-stretch gap-5 sm:flex-row sm:items-center sm:justify-center sm:gap-4">
-          <Button
-            size="lg"
-            className="w-full justify-center px-6 sm:w-auto"
-            asChild
-          >
-            <Link href="/editor">
-              Open Editor <FaArrowRight />{" "}
-            </Link>
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="w-full justify-center sm:w-auto"
-            asChild
-          >
-            <Link
-              href="https://github.com/HiRunOSS/shotzly"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2"
-            >
-              Star on GitHub <FaStar className="text-yellow-500" />
-              {stars === null ? (
-                <span
-                  className="inline-block ml-1 h-3 w-3 rounded-full border-2 border-gray-400 border-t-transparent animate-spin dark:border-gray-400"
-                  aria-hidden="true"
-                />
-              ) : (
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  {displayStars.toLocaleString()}
-                </span>
-              )}
-            </Link>
-          </Button>
-        </div>
+  return <section id="hero" className="relative isolate overflow-hidden bg-[#111010] text-white">
+    <div className="relative z-10 mx-auto max-w-5xl px-5 pt-8 text-center">
+      <p className="mb-5 text-xs font-medium uppercase tracking-normal text-white/60">A little polish. A lot more you.</p>
+      <h1 className="text-4xl font-semibold leading-[1.1] tracking-normal sm:text-6xl">Screenshot &amp; code<br />image studio.</h1>
+      <p className="mx-auto mt-5 max-w-lg text-base leading-7 text-white/60">Turn what you&apos;re building into something worth sharing.</p>
+      <div className="mt-7 flex flex-wrap justify-center gap-3">
+        <Link href="/editor" className="inline-flex h-11 items-center gap-3 rounded-md bg-white px-5 text-sm font-semibold text-black hover:bg-neutral-200">Open editor <ArrowRight size={17} /></Link>
+        <ExampleButton example="launch" className="h-11 rounded-md border border-white/20 px-5 text-sm text-white hover:bg-white/10">Try an example</ExampleButton>
       </div>
-    </section>
-  );
+      <p className="mt-4 text-xs text-white/40">Free to create. Yours to share.</p>
+    </div>
+    <div className="relative mx-auto mt-8 aspect-video w-[calc(100%-40px)] max-w-[900px] overflow-hidden rounded-lg">
+      <Image src={launchPreview} alt="A single dashboard screenshot centered on a Mac wallpaper in Shotzly" fill sizes="(max-width: 940px) calc(100vw - 40px), 900px" priority className="object-contain" />
+    </div>
+  </section>;
 }

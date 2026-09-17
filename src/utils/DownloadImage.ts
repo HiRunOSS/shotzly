@@ -116,7 +116,7 @@ function applyExportLayoutFallback(root: HTMLElement) {
         : DEFAULT_LAYOUT_PRESET;
       const rawImageScale = Number(el.dataset.imageScale);
       const imageScale = Number.isFinite(rawImageScale)
-        ? Math.max(50, Math.min(150, rawImageScale)) / 100
+        ? Math.max(1, Math.min(150, rawImageScale)) / 100
         : 1;
       el.style.transform = `${getExportSafeLayoutTransform(
         safePreset,
@@ -279,6 +279,11 @@ async function captureCloneAsCanvas(
   } finally {
     dispose();
   }
+}
+
+export async function screenshotToBlob(node: HTMLElement, resolution: ImageExportResolution = "auto") {
+  const canvas = await captureCloneAsCanvas(node, false, resolution);
+  return canvasToBlob(canvas, "image/png");
 }
 
 export default async function exportAsImage(

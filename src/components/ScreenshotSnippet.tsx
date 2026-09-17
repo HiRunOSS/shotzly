@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useDropzone, type FileRejection } from "react-dropzone";
 import ScreenshotTransformControls from "./ScreenshotTransformControls";
+import MultiScreenshotCanvas from "./MultiScreenshotCanvas";
 import {
   useEditorStore,
   type ScreenshotBrowserStyle,
@@ -52,7 +53,6 @@ const ASPECT_RATIO_NUMBER_MAP: Record<ScreenshotAspectRatio, number> = {
   "9:16": 9 / 16,
 };
 
-const BACKGROUND_PADDING = "clamp(16px, 4.5vw, 64px)";
 const MAX_PREVIEW_WIDTH_PX = 1200;
 const MAX_IMAGE_SIZE_BYTES = 12 * 1024 * 1024;
 const BROWSER_FRAME_STYLES: Record<
@@ -109,6 +109,9 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
   const gradient = useEditorStore((state) => state.screenshotGradient);
   const setPreviewRef = useEditorStore((state) => state.setPreviewRef);
   const uploadedImage = useEditorStore((state) => state.uploadedImage);
+  const hasExtraImages = useEditorStore((state) => state.canvasImages.length > 0);
+  const selectedExtra = useEditorStore((state) => state.selectedCanvasImageId);
+  const selectExtra = useEditorStore((state) => state.selectCanvasImage);
   const setUploadedImage = useEditorStore((state) => state.setUploadedImage);
   const setScreenshotSettings = useEditorStore(
     (state) => state.setScreenshotSettings,
@@ -121,7 +124,7 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
   const [isCapturingWebsite, setIsCapturingWebsite] = useState(false);
   const [previewWidth, setPreviewWidth] = useState(MAX_PREVIEW_WIDTH_PX);
   const imageSrc = uploadedImage;
-  const safeImageScale = Math.max(50, Math.min(settings.imageScale, 150));
+  const safeImageScale = Math.max(1, Math.min(settings.imageScale, 150));
   const safeBackgroundBlur = Math.max(
     0,
     Math.min(settings.backgroundBlur, 24),
@@ -455,10 +458,10 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
     const updatePreviewWidth = () => {
       const { height, width } = viewport.getBoundingClientRect();
       const nextWidth = Math.max(
-        240,
+        1,
         Math.min(MAX_PREVIEW_WIDTH_PX, width, height * aspectRatioNumber),
       );
-      setPreviewWidth(Math.round(nextWidth));
+      setPreviewWidth(Math.floor(nextWidth));
     };
 
     updatePreviewWidth();
@@ -476,18 +479,19 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
   return (
     <section
       ref={previewViewportRef}
-      className="flex h-full min-h-[300px] w-full flex-col items-center justify-center gap-5 px-1 sm:gap-6"
+      className="relative flex h-full min-h-0 w-full min-w-0 flex-col items-center justify-center"
     >
+      <MultiScreenshotCanvas />
       <div
         ref={setPreviewRef}
         data-export-sharp-border="true"
         data-screenshot-canvas="true"
-        className="relative mx-auto box-border overflow-hidden rounded-lg"
+        className="relative mx-auto box-border max-w-full shrink-0 overflow-hidden rounded-lg"
         onPointerDown={() => setImageSelected(false)}
         style={{
           aspectRatio: aspectRatioValue,
           backgroundColor: "#111010",
-          padding: BACKGROUND_PADDING,
+          padding: imageSrc ? `${Math.min(64, previewWidth * 0.045)}px` : "8px",
           width: `${previewWidth}px`,
         }}
       >
@@ -512,10 +516,12 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
         <div
           {...getRootProps({
             "data-export-sharp-border": "true",
-            className: "relative z-10 h-full w-full",
+            className: "relative h-full w-full",
           })}
           style={{
             ...getFrameStyles(),
+            zIndex: imageSrc && !selectedExtra ? 30 : 10,
+            pointerEvents: imageSrc || hasExtraImages ? "none" : undefined,
             overflow: imageSrc ? "visible" : "hidden",
           }}
         >
@@ -723,14 +729,14 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
               </>
             ) : (
               <div
-                className="relative flex h-full w-full items-center justify-center overflow-hidden"
+                className={`relative h-full w-full overflow-auto ${hasExtraImages ? "invisible" : ""}`}
                 style={{
                   borderRadius: `${borderRadius}px`,
                 }}
               >
                 <div
                   data-export-ignore="true"
-                  className={`relative z-10 flex w-[88%] max-w-[430px] flex-col items-center text-center text-white transition-all duration-200 sm:w-[86%] ${isDragActive ? "scale-[1.01]" : ""
+                  className={`relative z-10 mx-auto flex min-h-full w-full max-w-[430px] flex-col items-center justify-center py-1 text-center text-white transition-all duration-200 sm:w-[86%] ${isDragActive ? "scale-[1.01]" : ""
                     }`}
                 >
                   <button
@@ -742,19 +748,11 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
                     <UploadCloud className="h-6 w-6 stroke-[1.8] sm:h-8 sm:w-8" />
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={open}
-                    className="relative mt-1 rounded text-[11px] font-bold leading-4 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white sm:mt-2 sm:text-base sm:leading-6"
-                    style={{ textShadow: "0 2px 8px rgba(0,0,0,0.78)" }}
-                  >
-
-                  </button>
                   <p className="mt-1 text-[10px] text-white/90 sm:text-xs">
                     Drop an image here or click to choose one.
                   </p>
 
-                  <div className="relative mt-1.5 flex items-center gap-1.5 rounded-md bg-white/8 px-2 py-1 text-[10px] font-medium text-white/70 backdrop-blur-md sm:mt-2.5 sm:px-2.5 sm:py-1.5 sm:text-[11px]">
+                  <div className="relative mt-1.5 hidden items-center gap-1.5 rounded-md bg-white/8 px-2 py-1 text-[10px] font-medium text-white/70 backdrop-blur-md sm:mt-2.5 sm:flex sm:px-2.5 sm:py-1.5 sm:text-[11px]">
                     <span className="rounded bg-white/10 px-1.5 py-0.5 font-semibold leading-none text-white/90">
                       ⌘ / Ctrl + V
                     </span>
@@ -816,8 +814,8 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
                 target={transformTargetRef}
                 settings={settings}
                 style={getLayoutPresetStyles()}
-                selected={imageSelected}
-                onSelect={setImageSelected}
+                selected={imageSelected && !selectedExtra}
+                onSelect={(value) => { setImageSelected(value); if (value) selectExtra(null); }}
               />
             )}
           </div>

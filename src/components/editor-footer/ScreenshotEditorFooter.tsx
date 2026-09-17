@@ -2,6 +2,7 @@
 
 import {useEffect, useRef, useState, type CSSProperties} from "react";
 import {Button} from "../ui/button";
+import StickerPicker from "../StickerPicker";
 import {Label} from "../ui/label";
 import {Check, ChevronDown} from "lucide-react";
 import {
@@ -64,10 +65,6 @@ const SCREENSHOT_ASPECT_OPTIONS: Array<{
   {value: "2:3", label: "2:3"},
   {value: "9:16", label: "9:16"},
 ];
-
-const clampImageScale = (value: number) => {
-  return Number.isFinite(value) && value >= 50 && value <= 150 ? Math.round(value) : 100;
-};
 
 const clampCornerRadius = (value: number) => {
   return Number.isFinite(value) ? Math.max(0, Math.min(64, value)) : 16;
@@ -152,7 +149,6 @@ export default function ScreenshotEditorFooter({
   const frameTriggerRef = useRef<HTMLButtonElement | null>(null);
   const frameDropdownRef = useRef<HTMLDivElement | null>(null);
   const hasVisibleFrame = settings.frameStyle !== "default";
-  const safeImageScale = clampImageScale(settings.imageScale);
   const safeCornerRadius = clampCornerRadius(settings.cornerRadius);
   const safeBorderWidth = clampBorderWidth(settings.borderWidth);
 
@@ -245,34 +241,9 @@ export default function ScreenshotEditorFooter({
               />
             </div>
 
-            <div className="w-44 shrink-0 space-y-1">
-              <Label
-                htmlFor="screenshot-image-scale"
-                className="text-xs text-gray-800 dark:text-gray-200/90"
-              >
-                Scale
-              </Label>
-              <div className="flex h-7 items-center gap-2 rounded-md border border-black/30 bg-white/80 px-2 dark:border-white/15 dark:bg-[#111010]/80">
-                <input
-                  id="screenshot-image-scale"
-                  type="range"
-                  min={50}
-                  max={150}
-                  step={1}
-                  value={safeImageScale}
-                  aria-label="Image scale"
-                  onChange={(e) =>
-                    onSettingsChange({
-                      ...settings,
-                      imageScale: clampImageScale(Number(e.target.value)),
-                    })
-                  }
-                  className="h-1.5 min-w-0 flex-1 accent-gray-950 dark:accent-gray-100"
-                />
-                <span className="w-9 text-right text-[10px] tabular-nums text-gray-600 dark:text-gray-300">
-                  {safeImageScale}%
-                </span>
-              </div>
+            <div className="w-32 shrink-0 space-y-1">
+              <Label htmlFor="sticker-picker" className="text-xs text-gray-800 dark:text-gray-200/90">Stickers</Label>
+              <StickerPicker />
             </div>
 
             <div className="w-36 shrink-0 space-y-1">

@@ -1,7 +1,7 @@
-import type {Metadata} from "next";
-import {Inter, JetBrains_Mono} from "next/font/google";
-import {Analytics} from "@vercel/analytics/next";
-import {SpeedInsights} from "@vercel/speed-insights/next";
+import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import "@/styles/globals.css";
 import {
@@ -30,13 +30,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_NAME,
   title: {
-    default: "Shotzly - Free Code Snippet Generator & Screenshot Editor",
+    default: "Shotzly - Screenshot & code image studio",
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    "Create beautiful code snippet images, keyboard-style code visuals, and polished screenshots online. Shotzly is a free code screenshot generator and screenshot editor for developers, bloggers, and docs.",
+    "Shotzly is a free online code snippet generator and screenshot editor built for developers who want to create clean, beautiful, and shareable visuals in seconds.",
   keywords: coreKeywords,
-  authors: [{name: SITE_CREATOR, url: SITE_CREATOR_URL}],
+  authors: [{ name: SITE_CREATOR, url: SITE_CREATOR_URL }],
   creator: SITE_CREATOR,
   publisher: SITE_CREATOR,
   category: "Developer Tools",

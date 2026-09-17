@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import {ArrowRight} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import ExampleButton from "./ExampleButton";
-import launchPreview from "../../../public/examples/launch.png";
+import editorPreview from "../../../public/sample-img/editor1.png";
 
 export default function Hero() {
   return <section id="hero" className="relative isolate overflow-hidden bg-[#111010] text-white">
@@ -16,8 +16,8 @@ export default function Hero() {
       </div>
       <p className="mt-4 text-xs text-white/40">Free to create. Yours to share.</p>
     </div>
-    <div className="relative mx-auto mt-8 aspect-video w-[calc(100%-40px)] max-w-[900px] overflow-hidden rounded-lg">
-      <Image src={launchPreview} alt="A single dashboard screenshot centered on a Mac wallpaper in Shotzly" fill sizes="(max-width: 940px) calc(100vw - 40px), 900px" priority className="object-contain" />
+    <div className="relative mx-auto mt-8 aspect-[1920/990] w-[calc(100%-40px)] max-w-6xl overflow-hidden rounded-lg border border-black/70">
+      <Image src={editorPreview} alt="Shotzly editor preview" fill sizes="(max-width: 1200px) calc(100vw - 40px), 1152px" priority className="object-contain" />
     </div>
   </section>;
 }

@@ -85,6 +85,72 @@ export default function LandingFooter() {
                 className="h-6 w-auto"
               />
             </a>
+
+            <a
+              href="https://rankcert.com/product/shotzly"
+              target="_blank"
+              rel="noopener"
+            >
+              <img
+                src="https://rankcert.com/badge/shotzly?style=card&theme=light"
+                alt="Shotzly on RankCert"
+                width="240"
+                height="64"
+                className="h-6 w-auto"
+              />
+            </a>
+            <a
+              href="https://www.listbulb.com/tools/shotzly"
+              target="_blank"
+              rel="noopener"
+            >
+              <img
+                src="https://www.listbulb.com/featured-on-listbulb-light.svg"
+                alt="Featured on ListBulb"
+                height="240"
+                className="h-6 w-auto"
+              />
+            </a>
+            <a
+              href="https://www.tinyshelf.co/?ref=shotzly.com"
+              title="Featured on TinyShelf"
+            >
+              <img
+                src="https://www.tinyshelf.co/badge/tinyshelf-badge-dark-f4d1216a.svg"
+                alt="Featured on TinyShelf"
+                width="216"
+                height="64"
+                className="h-6 w-auto"
+              />
+            </a>
+            <a
+              href="https://findly.tools/shotzly?utm_source=shotzly"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://findly.tools/badges/findly-tools-badge-light.svg"
+                alt="Featured on Findly.tools"
+                width="175"
+                height="55"
+                className="h-6 w-auto"
+              />
+            </a>
+            <a
+              href="https://codehype.ai/product/shotzly?utm_source=codehype_badge"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://codehype.ai/badges/shotzly.svg?variant=find-us&v=20"
+                alt="Featured on CodeHype"
+                width="180"
+                height="65"
+                loading="lazy"
+                decoding="async"
+                className="inline-block h-6 w-auto max-w-[180px] border-0"
+              />
+            </a>
             <MakeItLastBadge />
           </div>
 

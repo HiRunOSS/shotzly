@@ -75,6 +75,12 @@
   display: none;
 }
 
+@keyframes badge-marquee {
+  to {
+    transform: translateX(min(0px, calc(100vw - 100%)));
+  }
+}
+
   .monaco-editor .iPadShowKeyboard {
     display: none !important;
   }

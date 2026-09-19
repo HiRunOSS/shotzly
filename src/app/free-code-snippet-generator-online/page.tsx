@@ -41,7 +41,7 @@ export const metadata: Metadata = {
         url: absoluteUrl(DEFAULT_OG_IMAGE),
         width: 4096,
         height: 2304,
-        type: "image/png",
+        type: "image/jpeg",
         alt: "Shotzly free code snippet generator online preview",
       },
     ],

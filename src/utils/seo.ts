@@ -5,7 +5,7 @@ export const SITE_NAME = "Shotzly";
 export const SITE_CREATOR = "Arun Kumar";
 export const SITE_CREATOR_URL = "https://x.com/hiarun02";
 export const GITHUB_REPO_URL = "https://github.com/HiRunOSS/shotzly";
-export const DEFAULT_OG_IMAGE = "/preview.png";
+export const DEFAULT_OG_IMAGE = "/preview.jpg";
 export const SCREENSHOT_OG_IMAGE = "/sample-img/editor2.png";
 
 export const coreKeywords = [

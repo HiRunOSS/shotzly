@@ -18,7 +18,7 @@ async function loadImage(path: string) {
   });
 }
 
-export default function ExampleButton({example, children = "Use this template", className = ""}: {example: ExampleId; children?: React.ReactNode; className?: string}) {
+export default function ExampleButton({example, children = "Use this template", className = "", showArrow = true}: {example: ExampleId; children?: React.ReactNode; className?: string; showArrow?: boolean}) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
@@ -35,13 +35,13 @@ export default function ExampleButton({example, children = "Use this template", 
         store.setCodeLanguage("javascript");store.setCodeThemePreset("shotzly-emerald-night");store.setCodeWindowStyle("macos");store.setCodeWindowTitle("create.ts");store.setFontSize(20);store.setCodePadding(48);store.setCodeGradient("#b5dbbe");store.setIsBackgroundHidden(false);
       } else {
         store.setScreenshotSettings(settings);
-        store.setScreenshotGradient(example === "comparison" ? "#b5dbbe" : "center / cover no-repeat url('/backgrounds/macos/mac-bg-2.jpg')");
+        store.setScreenshotGradient(example === "comparison" ? "center / cover no-repeat url('/backgrounds/macos/mac-bg-1.png')" : "center / cover no-repeat url('/backgrounds/macos/mac-bg-2.jpg')");
         store.setUploadedImage("");
-        store.setCanvasImages(sources.map((src, index) => ({id: crypto.randomUUID(), src, name: index ? "Before" : "After", x: example === "comparison" ? (index ? 26 : 74) : 50, y: 50, width: example === "comparison" ? 44 : 76, rotation: 0, radius: 12, shadow: true, settings})));
+        store.setCanvasImages(sources.map((src, index) => ({id: crypto.randomUUID(), src, name: index ? "Before" : "After", x: example === "comparison" ? (index ? 26 : 76) : 50, y: example === "comparison" ? (index ? 68 : 34) : 50, width: example === "comparison" ? 44 : 76, rotation: 0, radius: 12, shadow: true, settings})));
         store.selectCanvasImage(null);
       }
       router.push("/editor");
     } catch { setError(true); setBusy(false); }
   }
-  return <button type="button" disabled={busy} onClick={load} className={`inline-flex items-center justify-center gap-2 disabled:opacity-60 ${className}`} aria-label={`Open ${example} example`}>{busy ? <Loader2 size={16} className="animate-spin" /> : null}{error ? "Try again" : children}{!busy && <ArrowUpRight size={17} />}</button>;
+  return <button type="button" disabled={busy} onClick={load} className={`inline-flex items-center justify-center gap-2 disabled:opacity-60 ${className}`} aria-label={`Open ${example} example`}>{busy ? <Loader2 size={16} className="animate-spin" /> : null}{error ? "Try again" : children}{!busy && showArrow && <ArrowUpRight size={17} />}</button>;
 }

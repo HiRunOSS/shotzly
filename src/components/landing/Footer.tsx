@@ -13,6 +13,9 @@ export function MakeItLastBadge() {
 
 export default function LandingFooter() {
   const footerLinks = [
+    {label: "Privacy", href: "/privacy"},
+    {label: "Terms", href: "/terms"},
+    {label: "Contact", href: "/contact"},
     {
       label: "Contributing",
       href: "https://github.com/HiRunOSS/shotzly/blob/main/CONTRIBUTING.md",

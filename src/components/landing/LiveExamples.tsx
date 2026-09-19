@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import ExampleButton, { type ExampleId } from "./ExampleButton";
 import launchPreview from "../../../public/examples/launch.png";
+import comparisonPreview from "../../../public/examples/comparison.png";
 
 const examples: { id: ExampleId; title: string; category: string }[] = [
   { id: "launch", title: "Your next big launch.", category: "PRODUCT ANNOUNCEMENT" },
@@ -19,11 +20,12 @@ export default function LiveExamples() {
         <div className="mb-9 flex flex-wrap items-end justify-between gap-4"><div><p className="mb-3 text-xs text-white/50">A FEW GOOD STARTING POINTS</p><h2 className="text-3xl font-medium tracking-normal sm:text-4xl">Make it your own.</h2></div><p className="max-w-xs text-sm leading-6 text-white/50">Your launch, your tutorial, your latest win.</p></div>
         <div className="grid gap-10 md:grid-cols-3">
           {examples.map((example) => <article key={example.id} className="min-w-0">
-            <div className={`relative aspect-video overflow-hidden rounded-lg border border-white/15 ${example.id === "comparison" ? "bg-[#b5dbbe]" : "bg-neutral-900"}`}>
-              {example.id === "comparison" ? <>
-                <div className="absolute inset-y-[14%] left-[5%] w-[43%]"><Image src="/examples/product.png" alt="Before dashboard" fill sizes="(max-width: 768px) 42vw, 160px" className="object-contain" /></div>
-                <div className="absolute inset-y-[14%] right-[5%] w-[43%]"><Image src={launchPreview} alt="After dashboard" fill sizes="(max-width: 768px) 42vw, 160px" className="object-contain" /></div>
-              </> : <Image src={example.id === "launch" ? launchPreview : `/examples/${example.id}.png`} alt={example.title} fill sizes="(max-width: 768px) 100vw, 380px" className="object-contain" />}
+            <div className="relative aspect-video overflow-hidden rounded-lg border border-white/15 bg-neutral-900">
+              {example.id === "comparison" ? (
+                <ExampleButton example="comparison" showArrow={false} className="absolute inset-0 w-full overflow-hidden">
+                  <Image src={comparisonPreview} alt="Light and dark dashboards on a forest background" fill sizes="(max-width: 768px) 100vw, 380px" className="object-cover" />
+                </ExampleButton>
+              ) : <Image src={example.id === "launch" ? launchPreview : `/examples/${example.id}.png`} alt={example.title} fill sizes="(max-width: 768px) 100vw, 380px" className="object-contain" />}
             </div>
             <p className="mt-5 text-[10px] text-white/40">{example.category}</p><h3 className="mt-2 text-lg font-medium">{example.title}</h3><ExampleButton example={example.id} className="mt-4 border-b border-white/25 pb-1 text-sm text-white hover:border-white hover:text-white/70" />
           </article>)}

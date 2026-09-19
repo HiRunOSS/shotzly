@@ -17,7 +17,7 @@ import {
 // import SupportDialog from "@/components/landing/SupportDialog";
 
 export const metadata: Metadata = {
-  title: "Free Code Snippet Generator, Keyboard for Code & Screenshot Editor",
+  title: {absolute: "Screenshot & code image studio. | Shotzly"},
   description:
     "Shotzly is a free online code snippet generator and screenshot editor built for developers who want to create clean, beautiful, and shareable visuals in seconds.",
   keywords: coreKeywords,

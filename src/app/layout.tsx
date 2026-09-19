@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_NAME,
   title: {
-    default: "Shotzly - Screenshot & code image studio",
+    default: "Screenshot & code image studio. | Shotzly",
     template: `%s | ${SITE_NAME}`,
   },
   description:

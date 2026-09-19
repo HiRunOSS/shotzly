@@ -341,6 +341,17 @@ export default function CodeSnippet() {
     null,
   );
   const effectiveFontSize = Math.max(fontSize || 14, 10);
+  const configuredCodeFont =
+    typeof window === "undefined"
+      ? ""
+      : getComputedStyle(document.body)
+          .getPropertyValue("--font-jetbrains-mono")
+          .trim();
+  // next/font can emit an Arial-based fallback when the Google font is unavailable.
+  const codeFontFamily =
+    configuredCodeFont && !configuredCodeFont.startsWith("'JetBrains Mono Fallback'")
+      ? configuredCodeFont
+      : '"SFMono-Regular", "Cascadia Code", "Fira Code", ui-monospace, monospace';
   const effectiveCodePadding = Math.max(0, Math.min(codePadding || 0, 128));
   const editorVerticalPadding = 20;
   const editorLanguage = codeLanguage;
@@ -450,8 +461,7 @@ export default function CodeSnippet() {
             height={`${editorHeight}px`}
             options={{
               minimap: {enabled: false},
-              fontFamily:
-                'var(--font-jetbrains-mono), "JetBrains Mono", "SFMono-Regular", "Cascadia Code", "Fira Code", ui-monospace, monospace',
+              fontFamily: codeFontFamily,
               fontLigatures: true,
               fontSize: effectiveFontSize,
               lineHeight: Math.round(effectiveFontSize * 1.6),

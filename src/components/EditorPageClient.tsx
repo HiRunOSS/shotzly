@@ -125,7 +125,12 @@ export default function EditorPageClient() {
 
   useEffect(() => {
     hydrateFromStorage();
-  }, [hydrateFromStorage]);
+
+    const mode = new URLSearchParams(window.location.search).get("mode");
+    if (mode === "code" || mode === "screenshot") {
+      setEditorMode(mode);
+    }
+  }, [hydrateFromStorage, setEditorMode]);
 
   useEffect(() => {
     const fetchStars = async () => {

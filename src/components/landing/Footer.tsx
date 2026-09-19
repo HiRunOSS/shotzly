@@ -154,6 +154,19 @@ export default function LandingFooter() {
                 className="inline-block h-6 w-auto max-w-[180px] border-0"
               />
             </a>
+            <a
+              href="https://nicklaunches.com/products/shotzly/?utm_source=shotzly.com&utm_medium=badge&utm_campaign=featured"
+              target="_blank"
+              rel="noopener"
+            >
+              <img
+                src="https://nicklaunches.com/badges/featured.png"
+                alt="Shotzly on Nick Launches"
+                width="244"
+                height="56"
+                className="h-6 w-auto"
+              />
+            </a>
             <MakeItLastBadge />
           </div>
 

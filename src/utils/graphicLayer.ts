@@ -11,8 +11,9 @@ export const DEFAULT_GRAPHIC_LAYER: GraphicLayer = {
 
 export function renderGraphicLayer(layer: GraphicLayer) {
   const scale = 2;
-  const logicalWidth = layer.kind === "arrow" ? 300 : layer.kind === "rect" ? 240 : 180;
-  const logicalHeight = layer.kind === "rect" ? 160 : layer.kind === "arrow" ? 120 : 180;
+  const isRectangle = layer.kind === "rect" || layer.kind === "roundedRect" || layer.kind === "dashedRect";
+  const logicalWidth = layer.kind === "arrow" ? 300 : isRectangle ? 240 : 180;
+  const logicalHeight = isRectangle ? 160 : layer.kind === "arrow" ? 120 : 180;
   const canvas = document.createElement("canvas");
   canvas.width = logicalWidth * scale;
   canvas.height = logicalHeight * scale;
@@ -25,11 +26,16 @@ export function renderGraphicLayer(layer: GraphicLayer) {
   context.lineWidth = Math.max(1, Math.min(24, layer.strokeWidth));
   context.lineCap = "round";
   context.lineJoin = "round";
-  if (layer.kind === "rect") {
+  if (isRectangle) {
     const inset = context.lineWidth / 2 + 8;
     const x = inset, y = inset, w = logicalWidth - inset * 2, h = logicalHeight - inset * 2;
-    if (layer.filled) context.fillRect(x, y, w, h);
-    else context.strokeRect(x, y, w, h);
+    const radius = layer.kind === "roundedRect" ? 24 : 0;
+    if (layer.kind === "dashedRect") context.setLineDash([14, 10]);
+    context.beginPath();
+    if (radius) context.roundRect(x, y, w, h, radius);
+    else context.rect(x, y, w, h);
+    if (layer.filled) context.fill();
+    else context.stroke();
   } else if (layer.kind === "circle") {
     context.beginPath();
     context.arc(logicalWidth / 2, logicalHeight / 2, logicalWidth / 2 - context.lineWidth / 2 - 8, 0, Math.PI * 2);

@@ -813,72 +813,72 @@ export const ScreenshotSnippetBgCategories: ScreenshotBgCategory[] = [
       {
         name: "Mac Studio 1",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-1.png')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-1.webp')",
       },
       {
         name: "Mac Studio 2",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-2.jpg')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-2.webp')",
       },
       {
         name: "Mac Studio 3",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-3.jpg')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-3.webp')",
       },
       {
         name: "Mac Studio 4",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-4.jpg')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-4.webp')",
       },
       {
         name: "Mac Studio 5",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-5.png')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-5.webp')",
       },
       {
         name: "Mac Studio 6",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-6.png')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-6.webp')",
       },
       {
         name: "Mac Studio 7",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-7.png')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-7.webp')",
       },
       {
         name: "Mac Studio 8",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-8.png')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-8.webp')",
       },
       {
         name: "Mac Studio 9",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-9.png')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-9.webp')",
       },
       {
         name: "Mac Studio 10",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-10.png')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-10.webp')",
       },
       {
         name: "Mac Studio 11",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-11.jpeg')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-11.webp')",
       },
       {
         name: "Mac Studio 12",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-12.jpeg')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-12.webp')",
       },
       {
         name: "Mac Studio 13",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-13.jpg')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-13.webp')",
       },
       {
         name: "Mac Studio 14",
         gradient:
-          "center / cover no-repeat url('/backgrounds/macos/mac-bg-14.jpg')",
+          "center / cover no-repeat url('/backgrounds/macos/mac-bg-14.webp')",
       },
     ],
   },
@@ -1063,47 +1063,6 @@ export const ScreenshotSnippetBgCategories: ScreenshotBgCategory[] = [
         name: "Mesh 8",
         gradient:
           "center / cover no-repeat url('/backgrounds/mesh-bg/mesh8.webp')",
-      },
-    ],
-  },
-  {
-    id: "pattern",
-    label: "Pattern",
-    options: [
-      {
-        name: "Pattern 1",
-        gradient:
-          "center / cover no-repeat url('/backgrounds/pattern-bg/pattern1.webp')",
-      },
-      {
-        name: "Pattern 2",
-        gradient:
-          "center / cover no-repeat url('/backgrounds/pattern-bg/pattern2.webp')",
-      },
-      {
-        name: "Pattern 3",
-        gradient:
-          "center / cover no-repeat url('/backgrounds/pattern-bg/pattern3.webp')",
-      },
-      {
-        name: "Pattern 4",
-        gradient:
-          "center / cover no-repeat url('/backgrounds/pattern-bg/pattern4.webp')",
-      },
-      {
-        name: "Pattern 5",
-        gradient:
-          "center / cover no-repeat url('/backgrounds/pattern-bg/pattern5.webp')",
-      },
-      {
-        name: "Pattern 6",
-        gradient:
-          "center / cover no-repeat url('/backgrounds/pattern-bg/pattern6.webp')",
-      },
-      {
-        name: "Pattern 7",
-        gradient:
-          "center / cover no-repeat url('/backgrounds/pattern-bg/pattern7.webp')",
       },
     ],
   },

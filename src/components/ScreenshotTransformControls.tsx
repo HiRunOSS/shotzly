@@ -15,10 +15,11 @@ interface Props {
   onRemove?: () => void;
   onDuplicate?: () => void;
   coordinateSpace?: RefObject<HTMLElement | null>;
+  maxScale?: number;
 }
 
 // A separate overlay keeps editor controls out of both export renderers.
-export default function ScreenshotTransformControls({target, settings, style, selected, onSelect, onChange, onRemove, onDuplicate, coordinateSpace}: Props) {
+export default function ScreenshotTransformControls({target, settings, style, selected, onSelect, onChange, onRemove, onDuplicate, coordinateSpace, maxScale = 150}: Props) {
   const imageCount = useEditorStore((state) => state.canvasImages.length);
   const duplicate = () => {
     if (onDuplicate) { onDuplicate(); return; }
@@ -140,7 +141,7 @@ export default function ScreenshotTransformControls({target, settings, style, se
         } else if (g.mode === "resize") {
           const vx = g.x - g.cx, vy = g.y - g.cy;
           const ratio = ((event.clientX - g.cx) * vx + (event.clientY - g.cy) * vy) / Math.max(1, vx * vx + vy * vy);
-          update({imageScale: Math.max(1, Math.min(150, g.initial.imageScale * ratio))});
+          update({imageScale: Math.max(1, Math.min(maxScale, g.initial.imageScale * ratio))});
         } else {
           const angle = Math.atan2(event.clientY - g.cy, event.clientX - g.cx) - Math.atan2(g.y - g.cy, g.x - g.cx);
           const degrees = g.initial.rotation + angle * 180 / Math.PI;
@@ -188,7 +189,7 @@ export default function ScreenshotTransformControls({target, settings, style, se
               if (!["ArrowUp", "ArrowRight", "ArrowDown", "ArrowLeft"].includes(event.key)) return;
               event.preventDefault(); event.stopPropagation();
               const direction = event.key === "ArrowUp" || event.key === "ArrowRight" ? 1 : -1;
-              update({imageScale: Math.max(1, Math.min(150, settings.imageScale + direction * (event.shiftKey ? 10 : 1)))});
+              update({imageScale: Math.max(1, Math.min(maxScale, settings.imageScale + direction * (event.shiftKey ? 10 : 1)))});
             }}
             className="absolute flex h-6 w-6 touch-none items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
             style={{

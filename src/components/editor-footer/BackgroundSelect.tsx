@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   type CSSProperties,
   useEffect,
@@ -23,15 +24,18 @@ const CATEGORY_DISPLAY_ORDER = [
   "macos",
   "raycast",
   "mesh",
-  "pattern",
+  "radiant",
+  "magic",
   "windows",
   "linux",
   "gradient",
-  "magic",
-  "radiant",
   "abstract",
 ];
 const MAX_CUSTOM_BACKGROUND_SIZE_BYTES = 3 * 1024 * 1024;
+
+function getBackgroundImagePath(background: string) {
+  return background.match(/url\(['"]?(\/backgrounds\/[^'")]+)['"]?\)/)?.[1] ?? null;
+}
 
 function sortBackgroundCategories() {
   return [...ScreenshotSnippetBgCategories].sort((first, second) => {
@@ -265,8 +269,13 @@ export default function BackgroundSelect({
                   {category.label}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
-                  {category.options.map((item) => (
-                    <button
+                  {category.options.map((item) => {
+                    const imagePath = getBackgroundImagePath(item.gradient);
+                    const previewPath = category.id === "macos" && imagePath
+                      ? imagePath.replace("/backgrounds/macos/", "/backgrounds/macos/thumbs/")
+                      : imagePath;
+
+                    return <button
                       key={item.name}
                       type="button"
                       onClick={() => {
@@ -278,15 +287,17 @@ export default function BackgroundSelect({
                       title={item.name}
                     >
                       <span
-                        className={`block h-10 w-10 rounded-md border ${
+                        className={`relative block h-10 w-10 overflow-hidden rounded-md border ${
                           value === item.gradient
                             ? "border-blue-500 ring-2 ring-blue-400/70"
                             : "border-black/15 dark:border-white/15"
                         }`}
-                        style={{background: item.gradient}}
-                      />
-                    </button>
-                  ))}
+                        style={imagePath ? undefined : {background: item.gradient}}
+                      >
+                        {previewPath ? <Image src={previewPath} alt="" fill sizes="40px" quality={55} loading="lazy" unoptimized={category.id === "macos"} className="object-cover" /> : null}
+                      </span>
+                    </button>;
+                  })}
                 </div>
               </div>
             ))}

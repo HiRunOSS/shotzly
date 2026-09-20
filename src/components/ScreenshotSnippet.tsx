@@ -118,7 +118,7 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
   );
   const previewViewportRef = useRef<HTMLElement | null>(null);
   const transformTargetRef = useRef<HTMLElement | null>(null);
-  const [imageSelected, setImageSelected] = useState(true);
+  const [imageSelected, setImageSelected] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [websiteCaptureError, setWebsiteCaptureError] = useState("");
   const [isCapturingWebsite, setIsCapturingWebsite] = useState(false);
@@ -137,8 +137,10 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
     ASPECT_RATIO_NUMBER_MAP["16:9"];
 
   const borderRadius = Math.max(0, Math.min(64, settings.cornerRadius));
-  const isSolidBorderFrame =
-    settings.frameStyle === "border" || settings.frameStyle === "border-dark";
+  const isSolidBorderFrame = settings.frameStyle === "border";
+  const frameColor = /^#[0-9a-fA-F]{6}$/.test(settings.borderColor ?? "")
+    ? settings.borderColor
+    : "#ffffff";
   const browserFrameStyle =
     settings.browserStyle !== "none"
       ? BROWSER_FRAME_STYLES[settings.browserStyle]
@@ -170,40 +172,28 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
 
   const getScreenshotWrapperStyles = (): React.CSSProperties => {
     switch (settings.frameStyle) {
-      case "glass-light":
+      case "glass":
         return {
           padding: "0px",
-          border: `${safeBorderWidthPx}px solid rgba(255, 255, 255, 0.62)`,
-          backgroundColor: "transparent",
-        };
-      case "glass-dark":
-        return {
-          padding: "0px",
-          border: `${safeBorderWidthPx}px solid rgba(255, 255, 255, 0.26)`,
+          border: `${safeBorderWidthPx}px solid ${frameColor}99`,
           backgroundColor: "transparent",
         };
       case "border":
         return {
           padding: `${solidBorderWidthPx}px`,
           border: "none",
-          backgroundColor: "rgb(255, 255, 255)",
-        };
-      case "border-dark":
-        return {
-          padding: `${solidBorderWidthPx}px`,
-          border: "none",
-          backgroundColor: "rgb(26, 26, 26)",
+          backgroundColor: frameColor,
         };
       case "dashed":
         return {
           padding: "0px",
-          border: `${safeBorderWidthPx}px dashed rgba(255, 255, 255, 0.46)`,
+          border: `${safeBorderWidthPx}px dashed ${frameColor}`,
           backgroundColor: "transparent",
         };
       case "dotted":
         return {
           padding: "0px",
-          border: `${safeBorderWidthPx}px dotted rgba(255, 255, 255, 0.58)`,
+          border: `${safeBorderWidthPx}px dotted ${frameColor}`,
           backgroundColor: "transparent",
         };
       case "default":
@@ -247,13 +237,11 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
 
   const getFrameBorderWidthPx = () => {
     switch (settings.frameStyle) {
-      case "glass-light":
-      case "glass-dark":
+      case "glass":
       case "dashed":
       case "dotted":
         return safeBorderWidthPx;
       case "border":
-      case "border-dark":
         return solidBorderWidthPx;
       case "default":
       default:
@@ -311,11 +299,12 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
         const store = useEditorStore.getState();
         store.setScreenshotSettings({ ...store.screenshotSettings, offsetX: 0, offsetY: 0, rotation: 0 });
         setImageSelected(true);
+        selectExtra(null);
         setUploadedImage(base64);
       };
       reader.readAsDataURL(file);
     },
-    [setUploadedImage],
+    [selectExtra, setUploadedImage],
   );
 
   const importImageBlob = useCallback(
@@ -373,6 +362,7 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
       const blob = await response.blob();
       await importImageBlob(blob);
       setImageSelected(true);
+      selectExtra(null);
       setScreenshotSettings({
         ...settings,
         aspectRatio: "16:9",
@@ -480,6 +470,12 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
     <section
       ref={previewViewportRef}
       className="relative flex h-full min-h-0 w-full min-w-0 flex-col items-center justify-center"
+      onPointerDown={(event) => {
+        if (event.target === event.currentTarget) {
+          setImageSelected(false);
+          selectExtra(null);
+        }
+      }}
     >
       <MultiScreenshotCanvas />
       <div
@@ -487,7 +483,10 @@ export default function ScreenshotSnippet({ settings }: ScreenshotSnippetProps) 
         data-export-sharp-border="true"
         data-screenshot-canvas="true"
         className="relative mx-auto box-border max-w-full shrink-0 overflow-hidden rounded-lg"
-        onPointerDown={() => setImageSelected(false)}
+        onPointerDown={() => {
+          setImageSelected(false);
+          selectExtra(null);
+        }}
         style={{
           aspectRatio: aspectRatioValue,
           backgroundColor: "#111010",

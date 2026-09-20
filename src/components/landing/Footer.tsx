@@ -6,7 +6,7 @@ export function MakeItLastBadge() {
   return (
     <a href="https://www.makeitla.st/" title="Featured on MakeItLast">
       <img src="https://www.makeitla.st/badge/makeitlast-badge-light.svg?v=3"
-        alt="Featured on MakeItLast" width={252} height={76} className="h-6 w-auto" />
+        alt="Featured on MakeItLast" width={252} height={76} loading="lazy" decoding="async" className="h-6 w-auto" />
     </a>
   );
 }
@@ -49,7 +49,7 @@ export default function LandingFooter() {
           <div className="flex w-max min-w-full items-center justify-center gap-3 px-6 animate-[badge-marquee_30s_ease-in-out_infinite_alternate] motion-reduce:animate-none group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
             {badges.map((badge) => (
               <a key={badge.href} href={badge.href} target="_blank" rel="noopener noreferrer" title={badge.alt} className="flex h-10 shrink-0 items-center rounded border border-white/30 bg-white px-2">
-                <img src={badge.src} alt={badge.alt} width={badge.width} height={badge.height} className="h-6 w-auto" />
+                <img src={badge.src} alt={badge.alt} width={badge.width} height={badge.height} loading="lazy" decoding="async" className="h-6 w-auto" />
               </a>
             ))}
           </div>

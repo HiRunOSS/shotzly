@@ -19,7 +19,9 @@ export type ScreenshotAspectRatio =
 
 export type ScreenshotLayoutPreset = LayoutPresetId;
 export type EditorMode = "code" | "screenshot";
-export type CanvasImage = {id: string; src: string; name: string; x: number; y: number; width: number; rotation: number; radius: number; shadow: boolean; settings?: ScreenshotSettings};
+export type TextLayer = {content: string; fontSize: number; color: string; opacity: number; fontFamily: "Inter" | "Arial" | "Georgia" | "monospace"; align: "left" | "center" | "right"};
+export type GraphicLayer = {kind: "rect" | "circle" | "arrow" | "emoji"; color: string; opacity: number; strokeWidth: number; filled: boolean; emoji: string};
+export type CanvasImage = {id: string; src: string; name: string; x: number; y: number; width: number; rotation: number; radius: number; shadow: boolean; settings?: ScreenshotSettings; textLayer?: TextLayer; graphicLayer?: GraphicLayer};
 export type CodeWindowStyle = "plain" | "macos" | "windows";
 export type ScreenshotBrowserStyle =
   | "none"
@@ -32,6 +34,7 @@ export interface ScreenshotSettings {
   borderStyle: "sharp" | "curved" | "round";
   cornerRadius: number;
   borderWidth: number;
+  borderColor: string;
   imageScale: number;
   offsetX: number;
   offsetY: number;
@@ -42,10 +45,8 @@ export interface ScreenshotSettings {
   aspectRatio: ScreenshotAspectRatio;
   frameStyle:
     | "default"
-    | "glass-light"
-    | "glass-dark"
+    | "glass"
     | "border"
-    | "border-dark"
     | "dashed"
     | "dotted";
   browserStyle: ScreenshotBrowserStyle;
@@ -161,15 +162,21 @@ const PREVIOUS_PREMIUM_DEFAULT_GRADIENT =
 const PREVIOUS_SCREENSHOT_DEFAULT_GRADIENT =
   "center / cover no-repeat url('/backgrounds/macos/mac-bg-2.jpg')";
 const DEFAULT_SCREENSHOT_GRADIENT =
-  "center / cover no-repeat url('/backgrounds/macos/mac-bg-7.png')";
+  "center / cover no-repeat url('/backgrounds/macos/mac-bg-7.webp')";
+const upgradeMacBackground = (background: string) =>
+  background.replace(
+    /\/backgrounds\/macos\/(mac-bg-\d+)\.(?:png|jpe?g)(?=['"]\))/g,
+    "/backgrounds/macos/$1.webp",
+  );
 const STORAGE_KEY = "shotzly-editor-state";
-const CODE_SAVE_DEBOUNCE_MS = 250;
+const PERSIST_DEBOUNCE_MS = 250;
 const MAX_PERSISTED_IMAGE_SIZE_BYTES = 12 * 1024 * 1024;
 
 const DEFAULT_SCREENSHOT_SETTINGS: ScreenshotSettings = {
   borderStyle: "curved",
   cornerRadius: 16,
   borderWidth: 4,
+  borderColor: "#ffffff",
   imageScale: 100,
   offsetX: 0,
   offsetY: 0,
@@ -178,7 +185,7 @@ const DEFAULT_SCREENSHOT_SETTINGS: ScreenshotSettings = {
   shadowStyle: "none",
   layoutPreset: DEFAULT_LAYOUT_PRESET,
   aspectRatio: "16:9",
-  frameStyle: "glass-light",
+  frameStyle: "glass",
   browserStyle: "none",
 };
 
@@ -189,6 +196,8 @@ const isValidLayoutPreset = (
 };
 
 const normalizeFrameStyle = (value: unknown): ScreenshotFrameStyle => {
+  if (value === "glass-light" || value === "glass-dark") return "glass";
+  if (value === "border-dark") return "border";
   if (value === "outline") {
     return "border";
   }
@@ -199,10 +208,8 @@ const normalizeFrameStyle = (value: unknown): ScreenshotFrameStyle => {
 
   if (
     value === "default" ||
-    value === "glass-light" ||
-    value === "glass-dark" ||
+    value === "glass" ||
     value === "border" ||
-    value === "border-dark" ||
     value === "dashed" ||
     value === "dotted"
   ) {
@@ -244,6 +251,9 @@ const normalizeScreenshotSettings = (
     borderWidth: Number.isFinite(rawBorderWidth)
       ? Math.max(0, Math.min(24, rawBorderWidth))
       : DEFAULT_SCREENSHOT_SETTINGS.borderWidth,
+    borderColor: typeof settings?.borderColor === "string" && /^#[0-9a-fA-F]{6}$/.test(settings.borderColor)
+      ? settings.borderColor
+      : DEFAULT_SCREENSHOT_SETTINGS.borderColor,
     cornerRadius: Number.isFinite(rawCornerRadius)
       ? Math.max(0, Math.min(64, rawCornerRadius))
       : (() => {
@@ -342,8 +352,8 @@ export const useEditorStore = create<EditorStore>((rawSet, get) => {
     }
   };
   let persistedCache: PersistedEditorState | null = null;
-  let codeSaveTimeout: ReturnType<typeof setTimeout> | null = null;
-  let pendingCodePatch: Partial<PersistedEditorState> = {};
+  let persistTimeout: ReturnType<typeof setTimeout> | null = null;
+  let pendingPersistPatch: Partial<PersistedEditorState> = {};
 
   const getDefaultPersistedState = (): PersistedEditorState => ({
     canvasImages: [],
@@ -392,7 +402,7 @@ export const useEditorStore = create<EditorStore>((rawSet, get) => {
 
   const saveToLocalStorage = (
     patch: Partial<PersistedEditorState>,
-    options: {debounceCode?: boolean} = {},
+    options: {debounce?: boolean} = {},
   ) => {
     const normalizedScreenshotSettings = patch.screenshotSettings
       ? normalizeScreenshotSettings({
@@ -408,31 +418,31 @@ export const useEditorStore = create<EditorStore>((rawSet, get) => {
     };
     persistedCache = nextState;
 
-    if (!options.debounceCode) {
+    if (!options.debounce) {
       writePersistedState(nextState);
       return;
     }
 
-    pendingCodePatch = {...pendingCodePatch, ...patch};
-    if (codeSaveTimeout) {
-      clearTimeout(codeSaveTimeout);
+    pendingPersistPatch = {...pendingPersistPatch, ...patch};
+    if (persistTimeout) {
+      clearTimeout(persistTimeout);
     }
-    codeSaveTimeout = setTimeout(() => {
+    persistTimeout = setTimeout(() => {
       const mergedState: PersistedEditorState = {
         ...ensurePersistedCache(),
-        ...pendingCodePatch,
-        screenshotSettings: pendingCodePatch.screenshotSettings
+        ...pendingPersistPatch,
+        screenshotSettings: pendingPersistPatch.screenshotSettings
           ? normalizeScreenshotSettings({
               ...ensurePersistedCache().screenshotSettings,
-              ...pendingCodePatch.screenshotSettings,
+              ...pendingPersistPatch.screenshotSettings,
             })
           : ensurePersistedCache().screenshotSettings,
       };
       persistedCache = mergedState;
       writePersistedState(mergedState);
-      pendingCodePatch = {};
-      codeSaveTimeout = null;
-    }, CODE_SAVE_DEBOUNCE_MS);
+      pendingPersistPatch = {};
+      persistTimeout = null;
+    }, PERSIST_DEBOUNCE_MS);
   };
 
   return {
@@ -464,8 +474,8 @@ export const useEditorStore = create<EditorStore>((rawSet, get) => {
       const previous = past.pop();
       if (!previous) return;
       future.push(snapshot());
-      if (codeSaveTimeout) clearTimeout(codeSaveTimeout);
-      pendingCodePatch = {};
+      if (persistTimeout) clearTimeout(persistTimeout);
+      pendingPersistPatch = {};
       lastEditKey = "";
       persistedCache = previous;
       writePersistedState(previous);
@@ -475,8 +485,8 @@ export const useEditorStore = create<EditorStore>((rawSet, get) => {
       const next = future.pop();
       if (!next) return;
       past.push(snapshot());
-      if (codeSaveTimeout) clearTimeout(codeSaveTimeout);
-      pendingCodePatch = {};
+      if (persistTimeout) clearTimeout(persistTimeout);
+      pendingPersistPatch = {};
       lastEditKey = "";
       persistedCache = next;
       writePersistedState(next);
@@ -494,7 +504,7 @@ export const useEditorStore = create<EditorStore>((rawSet, get) => {
     code: DEFAULT_CODE,
     setCode: (code) => {
       const newState = {code};
-      saveToLocalStorage(newState, {debounceCode: true});
+      saveToLocalStorage(newState, {debounce: true});
       set(newState);
     },
 
@@ -534,7 +544,7 @@ export const useEditorStore = create<EditorStore>((rawSet, get) => {
     codeGradient: DEFAULT_GRADIENT,
     setCodeGradient: (gradient) => {
       const newState = {codeGradient: gradient};
-      saveToLocalStorage(newState);
+      saveToLocalStorage(newState, {debounce: true});
       set(newState);
     },
 
@@ -542,7 +552,7 @@ export const useEditorStore = create<EditorStore>((rawSet, get) => {
     screenshotGradient: DEFAULT_SCREENSHOT_GRADIENT,
     setScreenshotGradient: (gradient) => {
       const newState = {screenshotGradient: gradient};
-      saveToLocalStorage(newState);
+      saveToLocalStorage(newState, {debounce: true});
       set(newState);
     },
 
@@ -627,11 +637,12 @@ export const useEditorStore = create<EditorStore>((rawSet, get) => {
           storedState.code === PREVIOUS_PREMIUM_DEFAULT_CODE
             ? DEFAULT_CODE
             : (storedState.code ?? DEFAULT_CODE),
-        codeGradient:
+        codeGradient: upgradeMacBackground(
           storedState.codeGradient === PREVIOUS_PREMIUM_DEFAULT_GRADIENT ||
           storedState.codeGradient === PREVIOUS_MACOS_DEFAULT_GRADIENT
             ? DEFAULT_GRADIENT
             : (storedState.codeGradient ?? DEFAULT_GRADIENT),
+        ),
         showLineNumbers:
           storedState.code === PREVIOUS_PREMIUM_DEFAULT_CODE &&
           storedState.showLineNumbers === true
@@ -659,10 +670,11 @@ export const useEditorStore = create<EditorStore>((rawSet, get) => {
         codeWindowStyle: normalizedPersistedState.codeWindowStyle,
         codeWindowTitle: normalizedPersistedState.codeWindowTitle,
         codeGradient: normalizedPersistedState.codeGradient,
-        screenshotGradient:
+        screenshotGradient: upgradeMacBackground(
           storedState.screenshotGradient === PREVIOUS_SCREENSHOT_DEFAULT_GRADIENT
             ? DEFAULT_SCREENSHOT_GRADIENT
             : (storedState.screenshotGradient ?? state.screenshotGradient),
+        ),
         isBackgroundHidden:
           storedState.isBackgroundHidden ?? state.isBackgroundHidden,
         showLineNumbers: normalizedPersistedState.showLineNumbers,

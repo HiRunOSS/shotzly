@@ -2,9 +2,8 @@
 
 import {useEffect, useRef, useState, type CSSProperties} from "react";
 import {Button} from "../ui/button";
-import StickerPicker from "../StickerPicker";
 import {Label} from "../ui/label";
-import {Check, ChevronDown} from "lucide-react";
+import {ChevronDown} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -84,13 +83,11 @@ const FRAME_OPTIONS: Array<{
   value: ScreenshotFrameStyle;
   label: string;
 }> = [
-  {value: "default", label: "Default"},
-  {value: "glass-light", label: "Glass Light"},
-  {value: "glass-dark", label: "Glass Dark"},
+  {value: "default", label: "None"},
+  {value: "glass", label: "Glass"},
   {value: "border", label: "Border"},
-  {value: "border-dark", label: "Border Dark"},
-  {value: "dashed", label: "Dashed"},
   {value: "dotted", label: "Dotted"},
+  {value: "dashed", label: "Dashed"},
 ];
 
 const clampBorderWidth = (value: number) => {
@@ -99,7 +96,7 @@ const clampBorderWidth = (value: number) => {
 
 const getFrameLabel = (value: ScreenshotFrameStyle) => {
   return (
-    FRAME_OPTIONS.find((option) => option.value === value)?.label ?? "Default"
+    FRAME_OPTIONS.find((option) => option.value === value)?.label ?? "None"
   );
 };
 
@@ -151,6 +148,9 @@ export default function ScreenshotEditorFooter({
   const hasVisibleFrame = settings.frameStyle !== "default";
   const safeCornerRadius = clampCornerRadius(settings.cornerRadius);
   const safeBorderWidth = clampBorderWidth(settings.borderWidth);
+  const safeBorderColor = /^#[0-9a-fA-F]{6}$/.test(settings.borderColor ?? "")
+    ? settings.borderColor
+    : "#ffffff";
 
   useEffect(() => {
     if (!isFrameOpen) {
@@ -241,11 +241,6 @@ export default function ScreenshotEditorFooter({
               />
             </div>
 
-            <div className="w-32 shrink-0 space-y-1">
-              <Label htmlFor="sticker-picker" className="text-xs text-gray-800 dark:text-gray-200/90">Stickers</Label>
-              <StickerPicker />
-            </div>
-
             <div className="w-36 shrink-0 space-y-1">
               <Label
                 htmlFor="screenshot-frame"
@@ -282,7 +277,7 @@ export default function ScreenshotEditorFooter({
                     style={isFixedFrameDropdown ? frameDropdownStyle : undefined}
                     onPointerDown={(event) => event.stopPropagation()}
                   >
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       {FRAME_OPTIONS.map((option) => {
                         const isActive = settings.frameStyle === option.value;
 
@@ -297,14 +292,16 @@ export default function ScreenshotEditorFooter({
                                 frameStyle: option.value,
                               });
                             }}
-                            className={`flex h-8 items-center justify-between rounded-md px-2 text-left text-xs transition ${
+                            className={`flex h-16 flex-col items-center justify-center gap-1 rounded-md border text-[11px] transition ${
                               isActive
-                                ? "bg-gray-950 text-white ring-1 ring-gray-950 dark:bg-white dark:text-black dark:ring-white"
-                                : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
+                                ? "border-orange-500 bg-orange-500/10 text-gray-950 dark:text-white"
+                                : "border-black/10 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/10"
                             }`}
                           >
+                            <span className="flex h-7 w-9 items-center justify-center rounded bg-gray-200 dark:bg-[#1d2028]">
+                              <span className="h-5 w-6 rounded-[3px] bg-white dark:bg-gray-100" style={{border: option.value === "default" ? "none" : `2px ${option.value === "dashed" || option.value === "dotted" ? option.value : "solid"} ${option.value === "glass" ? `${safeBorderColor}99` : safeBorderColor}`}} />
+                            </span>
                             <span>{option.label}</span>
-                            {isActive ? <Check className="h-3.5 w-3.5" /> : null}
                           </button>
                         );
                       })}
@@ -312,6 +309,13 @@ export default function ScreenshotEditorFooter({
 
                     {hasVisibleFrame ? (
                       <div className="mt-4 space-y-2 border-t border-black/10 pt-3 dark:border-white/10">
+                        <label className="flex items-center justify-between text-xs font-medium text-gray-700 dark:text-gray-200">
+                          <span>Color</span>
+                          <span className="flex items-center gap-2">
+                            <span className="font-mono text-gray-500 dark:text-gray-400">{safeBorderColor.toUpperCase()}</span>
+                            <input type="color" value={safeBorderColor} aria-label="Border color" onChange={(event) => onSettingsChange({...settings, borderColor: event.target.value})} className="h-7 w-8 cursor-pointer rounded border border-black/20 bg-transparent p-0.5 dark:border-white/20" />
+                          </span>
+                        </label>
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-gray-700 dark:text-gray-200">
                             Border Size

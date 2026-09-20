@@ -17,8 +17,9 @@ require.extensions[".ts"] = (module, filename) => {
   module._compile(outputText, filename);
 };
 
-function freshStore() {
+function freshStore(initialState) {
   const saved = new Map();
+  if (initialState) saved.set("shotzly-editor-state", JSON.stringify(initialState));
   global.window = {};
   global.localStorage = {getItem: (key) => saved.get(key) ?? null, setItem: (key, value) => saved.set(key, value)};
   const file = require.resolve("../src/store/useEditorStore.ts");
@@ -66,6 +67,54 @@ test("undo cancels stale debounced code persistence", async () => {
   store.getState().undo();
   await new Promise((done) => setTimeout(done, 300));
   assert.equal(JSON.parse(saved.get("shotzly-editor-state")).code, original);
+});
+
+test("background changes apply immediately and persist after the debounce", async () => {
+  const {store, saved} = freshStore();
+  const gradient = "center / cover no-repeat url('/backgrounds/macos/mac-bg-1.webp')";
+  store.getState().setScreenshotGradient(gradient);
+  assert.equal(store.getState().screenshotGradient, gradient);
+  assert.equal(saved.has("shotzly-editor-state"), false);
+  await new Promise((done) => setTimeout(done, 300));
+  assert.equal(JSON.parse(saved.get("shotzly-editor-state")).screenshotGradient, gradient);
+});
+
+test("saved mac backgrounds use optimized assets after hydration", () => {
+  const {store} = freshStore({
+    screenshotGradient: "center / cover no-repeat url('/backgrounds/macos/mac-bg-4.jpg')",
+    codeGradient: "center / cover no-repeat url('/backgrounds/macos/mac-bg-1.png')",
+  });
+  store.getState().hydrateFromStorage();
+  assert.match(store.getState().screenshotGradient, /mac-bg-4\.webp/);
+  assert.match(store.getState().codeGradient, /mac-bg-1\.webp/);
+});
+
+test("legacy frames migrate and custom border colors persist", () => {
+  const {store, saved} = freshStore({
+    screenshotSettings: {frameStyle: "glass-dark", borderColor: "#ff7a18"},
+  });
+  store.getState().hydrateFromStorage();
+  assert.equal(store.getState().screenshotSettings.frameStyle, "glass");
+  assert.equal(store.getState().screenshotSettings.borderColor, "#ff7a18");
+  store.getState().setScreenshotSettings({...store.getState().screenshotSettings, frameStyle: "border"});
+  assert.equal(JSON.parse(saved.get("shotzly-editor-state")).screenshotSettings.borderColor, "#ff7a18");
+});
+
+test("invalid border colors fall back to white", () => {
+  const {store} = freshStore();
+  store.getState().setScreenshotSettings({...store.getState().screenshotSettings, borderColor: "not-a-color"});
+  assert.equal(store.getState().screenshotSettings.borderColor, "#ffffff");
+});
+
+test("editable text layer metadata survives saving and hydration", () => {
+  const {store, saved} = freshStore();
+  const layer = {content: "Hello", fontSize: 32, color: "#ffffff", opacity: 100, fontFamily: "Inter", align: "center"};
+  const image = {id: "text-1", src: "data:image/webp;base64,test", name: "Hello", x: 50, y: 50, width: 20, rotation: 0, radius: 0, shadow: false, textLayer: layer};
+  store.getState().setCanvasImages([image]);
+  assert.deepEqual(JSON.parse(saved.get("shotzly-editor-state")).canvasImages[0].textLayer, layer);
+  const restored = freshStore(JSON.parse(saved.get("shotzly-editor-state"))).store;
+  restored.getState().hydrateFromStorage();
+  assert.deepEqual(restored.getState().canvasImages[0].textLayer, layer);
 });
 
 test("deleting the selected layer selects a remaining image and history keeps selection valid", () => {

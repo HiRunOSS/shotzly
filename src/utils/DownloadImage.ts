@@ -133,14 +133,6 @@ function applyExportVisualFixes(root: HTMLElement) {
       el.style.overflow = "hidden";
       el.style.backgroundClip = "padding-box";
 
-      const frameStyle = el.dataset.frameStyle;
-      if (frameStyle === "border-dark") {
-        // Fill the inner box with the border color to avoid thin transparent seams.
-        el.style.backgroundColor = "rgba(12, 15, 23, 1)";
-      } else if (frameStyle === "border") {
-        el.style.backgroundColor = "rgba(255, 255, 255, 0.96)";
-      }
-
       if (el.dataset.shadowStyle === "none") {
         el.style.filter = "none";
         el.style.boxShadow = "none";

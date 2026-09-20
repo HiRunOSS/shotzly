@@ -1,186 +1,150 @@
 "use client";
 
-import {useEffect, useRef, useState, type PointerEvent} from "react";
-import {ArrowUpRight, Check, Crop, Highlighter, ListOrdered, Pencil, Redo2, Shield, Square, Trash2, Type, Undo2} from "lucide-react";
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
-import {useEditorStore} from "@/store/useEditorStore";
-import {cropBounds, renderMarkup, type Mark, type MarkupTool} from "@/utils/markup";
+import {useState} from "react";
+import {createPortal} from "react-dom";
+import dynamic from "next/dynamic";
+import {useTheme} from "next-themes";
+import type {EmojiStyle, Theme} from "emoji-picker-react";
+import {ArrowUpRight, Circle, ImageIcon, Pencil, Smile, Square, Trash2, Type, X, CopyPlus} from "lucide-react";
+import {useEditorStore, type GraphicLayer, type TextLayer} from "@/store/useEditorStore";
+import {DEFAULT_TEXT_LAYER, renderTextLayer} from "@/utils/textLayer";
+import {DEFAULT_GRAPHIC_LAYER, renderGraphicLayer} from "@/utils/graphicLayer";
 
-const tools = [
-  {id: "crop", label: "Crop", icon: Crop},
-  {id: "arrow", label: "Arrow", icon: ArrowUpRight},
-  {id: "rectangle", label: "Rectangle", icon: Square},
-  {id: "highlight", label: "Highlight", icon: Highlighter},
-  {id: "step", label: "Numbered step", icon: ListOrdered},
-  {id: "text", label: "Text", icon: Type},
-  {id: "redact", label: "Redact", icon: Shield},
-] as const;
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), {ssr: false});
+
 const iconClass = "flex h-9 w-9 shrink-0 items-center justify-center rounded-md hover:bg-gray-200 disabled:opacity-35 dark:hover:bg-white/15";
 
-export default function ScreenshotMarkup() {
+export default function ScreenshotMarkup({sidebarOpen, onSidebarOpenChange}: {sidebarOpen: boolean; onSidebarOpenChange: (open: boolean) => void}) {
+  const canvasImages = useEditorStore((state) => state.canvasImages);
+  const setCanvasImages = useEditorStore((state) => state.setCanvasImages);
+  const selectCanvasImage = useEditorStore((state) => state.selectCanvasImage);
+  const previewRef = useEditorStore((state) => state.previewRef);
+  const screenshotSettings = useEditorStore((state) => state.screenshotSettings);
   const selectedImage = useEditorStore((state) => state.canvasImages.find((image) => image.id === state.selectedCanvasImageId));
-  const primaryImage = useEditorStore((state) => state.uploadedImage);
-  const source = selectedImage?.src ?? primaryImage;
-  const setImage = (src: string) => {
-    const store = useEditorStore.getState();
-    if (selectedImage) store.setCanvasImages(store.canvasImages.map((image) => image.id === selectedImage.id ? {...image, src} : image));
-    else store.setUploadedImage(src);
-  };
-  const [open, setOpen] = useState(false);
-  const [tool, setTool] = useState<MarkupTool>("arrow");
-  const [color, setColor] = useState("#ef4444");
-  const [size, setSize] = useState(4);
-  const [text, setText] = useState("");
-  const [marks, setMarks] = useState<Mark[]>([]);
-  const [redo, setRedo] = useState<Mark[][]>([]);
-  const [past, setPast] = useState<Mark[][]>([]);
-  const [ready, setReady] = useState(false);
+  const selectedText = selectedImage?.textLayer ? selectedImage : null;
+  const selectedGraphic = selectedImage?.graphicLayer ? selectedImage : null;
+  const {resolvedTheme} = useTheme();
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [replaceEmoji, setReplaceEmoji] = useState(false);
   const [error, setError] = useState("");
-  const [dimensions, setDimensions] = useState({width: 1, height: 1});
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const image = useRef<HTMLImageElement | null>(null);
-  const draft = useRef<Mark | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    setReady(false);
-    setError("");
-    setMarks([]);
-    setPast([]);
-    setRedo([]);
-    draft.current = null;
-    const next = new Image();
-    next.onload = () => {
-      image.current = next;
-      setDimensions({width: next.naturalWidth, height: next.naturalHeight});
-      setReady(true);
-    };
-    next.onerror = () => setError("Could not load this image.");
-    next.src = source;
-    return () => { next.onload = null; next.onerror = null; };
-  }, [open, source]);
-
-  useEffect(() => {
-    if (ready && canvas.current && image.current) renderMarkup(canvas.current, image.current, marks, true);
-  }, [marks, ready, dimensions]);
-
-  function commit(next: Mark[]) {
-    setPast((history) => [...history.slice(-39), marks]);
-    setMarks(next);
-    setRedo([]);
-  }
-  function undoMark() {
-    if (!past.length) return;
-    setRedo((history) => [...history, marks]);
-    setMarks(past[past.length - 1]);
-    setPast(past.slice(0, -1));
-  }
-  function redoMark() {
-    if (!redo.length) return;
-    setPast((history) => [...history, marks]);
-    setMarks(redo[redo.length - 1]);
-    setRedo(redo.slice(0, -1));
-  }
-  function point(event: PointerEvent<HTMLCanvasElement>) {
-    const rect = event.currentTarget.getBoundingClientRect();
-    return {
-      x: Math.max(0, Math.min(dimensions.width, (event.clientX - rect.left) / rect.width * dimensions.width)),
-      y: Math.max(0, Math.min(dimensions.height, (event.clientY - rect.top) / rect.height * dimensions.height)),
-    };
-  }
-  function paint(next: Mark | null) {
-    const base = next?.tool === "crop" ? marks.filter((mark) => mark.tool !== "crop") : marks;
-    if (canvas.current && image.current) renderMarkup(canvas.current, image.current, next ? [...base, next] : base, true);
-  }
-  function apply() {
-    if (!canvas.current || !image.current) return;
+  function addText() {
+    if (canvasImages.length >= 8) { setError("Maximum 8 added images or text layers."); return; }
     try {
-      // Flatten into pixels so exported redactions contain no underlying source layer.
-      renderMarkup(canvas.current, image.current, marks);
-      const crop = marks.find((mark) => mark.tool === "crop");
-      let output = canvas.current;
-      if (crop) {
-        const bounds = cropBounds(crop);
-        output = document.createElement("canvas");
-        output.width = bounds.width;
-        output.height = bounds.height;
-        const context = output.getContext("2d");
-        if (!context) throw new Error("Could not crop this image.");
-        context.drawImage(canvas.current, bounds.x, bounds.y, bounds.width, bounds.height, 0, 0, bounds.width, bounds.height);
-      }
-      setImage(output.toDataURL("image/png"));
-      setOpen(false);
-    } catch {
-      setError("Could not apply the edits. Try a smaller image.");
-    }
+      const layer = {...DEFAULT_TEXT_LAYER};
+      const rendered = renderTextLayer(layer);
+      const id = crypto.randomUUID();
+      const width = Math.min(70, rendered.width / Math.max(1, previewRef?.clientWidth ?? 800) * 100);
+      setCanvasImages([...canvasImages, {
+        id, name: layer.content, src: rendered.src, x: 50, y: 50, width,
+        rotation: 0, radius: 0, shadow: false, textLayer: layer,
+        settings: {...screenshotSettings, imageScale: 100, rotation: 0, offsetX: 0, offsetY: 0, cornerRadius: 0, borderWidth: 0, frameStyle: "default", browserStyle: "none", shadowStyle: "none", layoutPreset: "default"},
+      }]);
+      selectCanvasImage(id);
+      setError("");
+    } catch { setError("Could not add text."); }
+  }
+
+  function updateText(patch: Partial<TextLayer>) {
+    if (!selectedText?.textLayer) return;
+    try {
+      const next = {...selectedText.textLayer, ...patch};
+      const rendered = renderTextLayer(next);
+      const width = Math.min(70, rendered.width / Math.max(1, previewRef?.clientWidth ?? 800) * 100);
+      setCanvasImages(useEditorStore.getState().canvasImages.map((image) => image.id === selectedText.id ? {...image, src: rendered.src, name: next.content || "Text", textLayer: next, width} : image));
+      setError("");
+    } catch { setError("Could not update text."); }
+  }
+
+  function deleteText(id: string) {
+    setCanvasImages(useEditorStore.getState().canvasImages.filter((image) => image.id !== id));
+  }
+
+  function addGraphic(kind: GraphicLayer["kind"], emoji?: string) {
+    if (canvasImages.length >= 8) { setError("Maximum 8 added images or layers."); return; }
+    try {
+      const layer = {...DEFAULT_GRAPHIC_LAYER, kind, emoji: emoji ?? DEFAULT_GRAPHIC_LAYER.emoji};
+      const rendered = renderGraphicLayer(layer);
+      const id = crypto.randomUUID();
+      const width = Math.min(70, rendered.width / Math.max(1, previewRef?.clientWidth ?? 800) * 100);
+      const name = kind === "emoji" ? layer.emoji : kind === "rect" ? "Rectangle" : kind === "circle" ? "Circle" : "Arrow";
+      setCanvasImages([...useEditorStore.getState().canvasImages, {
+        id, name, src: rendered.src, x: Math.min(80, 50 + canvasImages.length * 3),
+        y: Math.min(80, 50 + canvasImages.length * 3), width,
+        rotation: 0, radius: 0, shadow: false, graphicLayer: layer,
+        settings: {...screenshotSettings, imageScale: 100, rotation: 0, offsetX: 0, offsetY: 0, cornerRadius: 0, borderWidth: 0, frameStyle: "default", browserStyle: "none", shadowStyle: "none", layoutPreset: "default"},
+      }]);
+      selectCanvasImage(id);
+      setEmojiPickerOpen(false);
+      setError("");
+    } catch { setError("Could not add this object."); }
+  }
+
+  function updateGraphic(patch: Partial<GraphicLayer>) {
+    if (!selectedGraphic?.graphicLayer) return;
+    try {
+      const next = {...selectedGraphic.graphicLayer, ...patch};
+      const rendered = renderGraphicLayer(next);
+      setCanvasImages(useEditorStore.getState().canvasImages.map((image) => image.id === selectedGraphic.id ? {...image, src: rendered.src, graphicLayer: next} : image));
+      setError("");
+    } catch { setError("Could not update this object."); }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button type="button" className={iconClass} disabled={!source} title="Annotate and redact" aria-label="Annotate and redact"><Pencil size={16} /></button>
-      </DialogTrigger>
-      <DialogContent aria-describedby={undefined} className="flex max-h-[90dvh] w-[calc(100%-24px)] max-w-5xl flex-col gap-3 overflow-y-auto rounded-lg bg-white p-4 text-gray-900 dark:bg-[#181818] dark:text-white"
-        onKeyDown={(event) => {
-          if ((event.metaKey || event.ctrlKey) && ["z", "y"].includes(event.key.toLowerCase()) && !(event.target instanceof HTMLInputElement)) {
-            event.preventDefault(); event.stopPropagation();
-            if (event.shiftKey || event.key.toLowerCase() === "y") redoMark(); else undoMark();
-          }
-        }}>
-        <DialogHeader><DialogTitle className="tracking-normal">Crop, annotate &amp; redact</DialogTitle></DialogHeader>
-        <div className="flex flex-wrap items-center gap-1 border-b border-gray-200 pb-3 dark:border-white/15" role="toolbar" aria-label="Markup tools">
-          {tools.map(({id, label, icon: Icon}) => (
-            <button key={id} type="button" title={label} aria-label={label} aria-pressed={tool === id} onClick={() => setTool(id)} className={`${iconClass} ${tool === id ? "bg-gray-200 dark:bg-white/20" : ""}`}><Icon size={18} /></button>
-          ))}
-          <input type="color" aria-label="Annotation color" title="Annotation color" disabled={tool === "redact" || tool === "crop"} value={color} onChange={(event) => setColor(event.target.value)} className="mx-2 h-8 w-8 cursor-pointer bg-transparent disabled:opacity-35" />
-          <input type="range" aria-label="Stroke size" title="Stroke size" disabled={tool === "crop"} min={2} max={10} value={size} onChange={(event) => setSize(Number(event.target.value))} className="w-20 accent-red-500 disabled:opacity-35" />
-          <div className="ml-auto flex">
-            <button type="button" title="Undo annotation" aria-label="Undo annotation" disabled={!past.length} onClick={undoMark} className={iconClass}><Undo2 size={18} /></button>
-            <button type="button" title="Redo annotation" aria-label="Redo annotation" disabled={!redo.length} onClick={redoMark} className={iconClass}><Redo2 size={18} /></button>
-            <button type="button" title="Clear annotations" aria-label="Clear annotations" disabled={!marks.length} onClick={() => commit([])} className={iconClass}><Trash2 size={18} /></button>
-          </div>
+    <>
+      <button type="button" className={iconClass} title="Edit screenshot" aria-label="Edit screenshot" aria-expanded={sidebarOpen} onClick={() => onSidebarOpenChange(!sidebarOpen)}><Pencil size={16} /></button>
+      {sidebarOpen && typeof document !== "undefined" && createPortal(<aside aria-label="Screenshot editor" className="fixed bottom-24 right-2 top-[72px] z-40 flex w-[min(320px,calc(100vw-16px))] flex-col overflow-hidden rounded-lg border border-black/10 bg-white/95 text-gray-900 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:bg-[#171717]/95 dark:text-gray-100 sm:right-4 sm:top-20 sm:bottom-28">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-black/10 px-4 dark:border-white/10">
+          <h2 className="text-sm font-semibold">Edit screenshot</h2>
+          <button type="button" aria-label="Close editor sidebar" title="Close" onClick={() => onSidebarOpenChange(false)} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10"><X size={16} /></button>
         </div>
-        {tool === "text" && <input aria-label="Annotation text" placeholder="Text" maxLength={120} value={text} onChange={(event) => setText(event.target.value)} className="rounded-md border border-gray-300 bg-transparent p-2 dark:border-white/20" />}
-        <div className="flex min-h-0 justify-center overflow-auto bg-gray-100 dark:bg-black/30">
-          {!ready && !error && <span role="status" className="p-8">Loading image...</span>}
-          <canvas ref={canvas} width={dimensions.width} height={dimensions.height} aria-label="Screenshot markup canvas"
-            className="block touch-none" style={{display: ready ? "block" : "none", maxWidth: "100%", maxHeight: "56dvh", width: "auto", height: "auto", cursor: "crosshair", aspectRatio: `${dimensions.width} / ${dimensions.height}`}}
-            onPointerDown={(event) => {
-              if (!ready || event.button !== 0 || draft.current || (tool === "text" && !text.trim())) return;
-              event.currentTarget.setPointerCapture(event.pointerId);
-              const start = point(event);
-              draft.current = {tool, start, end: start, color, width: size * Math.max(dimensions.width, dimensions.height) / 1000, text: tool === "step" ? String(marks.filter((mark) => mark.tool === "step").length + 1) : text};
-              paint(draft.current);
-            }}
-            onPointerMove={(event) => {
-              if (!draft.current) return;
-              draft.current = {...draft.current, end: point(event)};
-              paint(draft.current);
-            }}
-            onPointerUp={(event) => {
-              const mark = draft.current;
-              if (!mark) return;
-              draft.current = null;
-              event.currentTarget.releasePointerCapture(event.pointerId);
-              const next = {...mark, end: point(event)};
-              if (mark.tool === "crop") {
-                const bounds = cropBounds(next);
-                if (bounds.width >= 2 && bounds.height >= 2) commit([...marks.filter((item) => item.tool !== "crop"), next]);
-                else paint(null);
-                return;
-              }
-              if (mark.tool === "step" || mark.tool === "text" || Math.hypot(next.end.x - mark.start.x, next.end.y - mark.start.y) > 2) commit([...marks, next]);
-              else paint(null);
-            }}
-            onPointerCancel={() => { draft.current = null; paint(null); }}
-          />
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4">
+          <section>
+            <h3 className="mb-2 text-[11px] font-semibold uppercase text-gray-500 dark:text-gray-400">Add</h3>
+            <div className="grid grid-cols-3 gap-2">
+              <button type="button" onClick={addText} disabled={canvasImages.length >= 8} className="flex h-9 items-center gap-1.5 rounded-md border border-black/15 px-2 text-left text-xs font-medium hover:bg-black/5 disabled:opacity-40 dark:border-white/15 dark:hover:bg-white/10"><Type size={14} /> Text</button>
+              <button type="button" onClick={() => addGraphic("rect")} disabled={canvasImages.length >= 8} className="flex h-9 items-center gap-1.5 rounded-md border border-black/15 px-2 text-left text-xs hover:bg-black/5 disabled:opacity-40 dark:border-white/15 dark:hover:bg-white/10"><Square size={14} /> Rect</button>
+              <button type="button" onClick={() => addGraphic("circle")} disabled={canvasImages.length >= 8} className="flex h-9 items-center gap-1.5 rounded-md border border-black/15 px-2 text-left text-xs hover:bg-black/5 disabled:opacity-40 dark:border-white/15 dark:hover:bg-white/10"><Circle size={14} /> Circle</button>
+              <button type="button" onClick={() => addGraphic("arrow")} disabled={canvasImages.length >= 8} className="flex h-9 items-center gap-1.5 rounded-md border border-black/15 px-2 text-left text-xs hover:bg-black/5 disabled:opacity-40 dark:border-white/15 dark:hover:bg-white/10"><ArrowUpRight size={14} /> Arrow</button>
+              <button type="button" onClick={() => {setReplaceEmoji(false); setEmojiPickerOpen((value) => !value);}} disabled={canvasImages.length >= 8} aria-expanded={emojiPickerOpen} className="flex h-9 items-center gap-1.5 rounded-md border border-black/15 px-2 text-left text-xs hover:bg-black/5 disabled:opacity-40 dark:border-white/15 dark:hover:bg-white/10"><Smile size={14} /> Emoji</button>
+            </div>
+            {emojiPickerOpen && <div className="mt-2 overflow-hidden rounded-md border border-black/10 dark:border-white/15"><EmojiPicker width="100%" height={300} lazyLoadEmojis emojiStyle={"native" as EmojiStyle} theme={(resolvedTheme === "dark" ? "dark" : "light") as Theme} searchPlaceholder="Search emojis" onEmojiClick={(data) => {
+              if (replaceEmoji && selectedGraphic?.graphicLayer?.kind === "emoji") {updateGraphic({emoji: data.emoji}); setEmojiPickerOpen(false);}
+              else addGraphic("emoji", data.emoji);
+            }} /></div>}
+          </section>
+          <section>
+            <h3 className="mb-2 text-[11px] font-semibold uppercase text-gray-500 dark:text-gray-400">Layers</h3>
+            <div className="space-y-1">
+              {canvasImages.map((image) => <div key={image.id} className={`flex items-center gap-1 rounded-md border ${selectedImage?.id === image.id ? "border-emerald-500 bg-emerald-500/5" : "border-black/10 dark:border-white/10"}`}>
+                <button type="button" onClick={() => selectCanvasImage(image.id)} className="flex min-w-0 flex-1 items-center gap-2 px-2 py-2 text-left text-xs">{image.textLayer ? <Type size={14} className="shrink-0" /> : image.graphicLayer?.kind === "rect" ? <Square size={14} className="shrink-0" /> : image.graphicLayer?.kind === "circle" ? <Circle size={14} className="shrink-0" /> : image.graphicLayer?.kind === "arrow" ? <ArrowUpRight size={14} className="shrink-0" /> : image.graphicLayer?.kind === "emoji" ? <Smile size={14} className="shrink-0" /> : <ImageIcon size={14} className="shrink-0" />}<span className="truncate">{image.name}</span></button>
+                <button type="button" title="Duplicate layer" aria-label={`Duplicate ${image.name}`} disabled={canvasImages.length >= 8} onClick={() => {const id = crypto.randomUUID(); setCanvasImages([...useEditorStore.getState().canvasImages, {...image, id, x: Math.min(90, image.x + 3), y: Math.min(90, image.y + 3)}]); selectCanvasImage(id);}} className="flex h-8 w-8 items-center justify-center disabled:opacity-40"><CopyPlus size={13} /></button>
+                <button type="button" title="Delete layer" aria-label={`Delete ${image.name}`} onClick={() => deleteText(image.id)} className="flex h-8 w-8 items-center justify-center text-red-500"><Trash2 size={13} /></button>
+              </div>)}
+              {!canvasImages.length && <p className="py-2 text-xs text-gray-500">No layers</p>}
+            </div>
+          </section>
+          {selectedText?.textLayer && <section className="space-y-3 border-t border-black/10 pt-4 dark:border-white/10">
+            <h3 className="text-[11px] font-semibold uppercase text-gray-500 dark:text-gray-400">Selected text</h3>
+            <textarea aria-label="Text content" value={selectedText.textLayer.content} maxLength={120} rows={3} onChange={(event) => updateText({content: event.target.value})} className="w-full resize-y rounded-md border border-black/15 bg-transparent p-2 text-sm outline-none focus:border-emerald-500 dark:border-white/15" />
+            <label className="block space-y-1 text-xs"><span>Font</span><select aria-label="Text font" value={selectedText.textLayer.fontFamily} onChange={(event) => updateText({fontFamily: event.target.value as TextLayer["fontFamily"]})} className="h-9 w-full rounded-md border border-black/15 bg-white px-2 dark:border-white/15 dark:bg-[#171717]"><option value="Inter">Inter</option><option value="Arial">Arial</option><option value="Georgia">Georgia</option><option value="monospace">Monospace</option></select></label>
+            <div className="flex items-center justify-between text-xs"><label htmlFor="text-color">Color</label><input id="text-color" type="color" value={selectedText.textLayer.color} onChange={(event) => updateText({color: event.target.value})} className="h-8 w-9 cursor-pointer rounded border border-black/15 bg-transparent p-0.5 dark:border-white/15" /></div>
+            <label className="block space-y-1 text-xs"><span className="flex justify-between"><span>Size</span><span>{selectedText.textLayer.fontSize}px</span></span><input type="range" min={12} max={120} value={selectedText.textLayer.fontSize} onChange={(event) => updateText({fontSize: Number(event.target.value)})} className="w-full accent-emerald-600" /></label>
+            <label className="block space-y-1 text-xs"><span className="flex justify-between"><span>Opacity</span><span>{selectedText.textLayer.opacity}%</span></span><input type="range" min={0} max={100} value={selectedText.textLayer.opacity} onChange={(event) => updateText({opacity: Number(event.target.value)})} className="w-full accent-emerald-600" /></label>
+            <div role="group" aria-label="Text alignment" className="grid grid-cols-3 gap-1 rounded-md bg-black/5 p-1 dark:bg-white/5">{(["left", "center", "right"] as const).map((align) => <button key={align} type="button" aria-pressed={selectedText.textLayer?.align === align} onClick={() => updateText({align})} className={`rounded px-2 py-1.5 text-xs capitalize ${selectedText.textLayer?.align === align ? "bg-white shadow-sm dark:bg-[#303030]" : ""}`}>{align}</button>)}</div>
+          </section>}
+          {selectedGraphic?.graphicLayer && <section className="space-y-3 border-t border-black/10 pt-4 dark:border-white/10">
+            <h3 className="text-[11px] font-semibold uppercase text-gray-500 dark:text-gray-400">Selected {selectedGraphic.graphicLayer.kind === "rect" ? "rectangle" : selectedGraphic.graphicLayer.kind}</h3>
+            {selectedGraphic.graphicLayer.kind === "emoji" ? <button type="button" onClick={() => {setReplaceEmoji(true); setEmojiPickerOpen(true);}} className="flex h-9 w-full items-center gap-2 rounded-md border border-black/15 px-3 text-xs dark:border-white/15"><Smile size={15} /> Change emoji</button> : <>
+              <div className="flex items-center justify-between text-xs"><label htmlFor="graphic-color">Color</label><input id="graphic-color" type="color" value={selectedGraphic.graphicLayer.color} onChange={(event) => updateGraphic({color: event.target.value})} className="h-8 w-9 cursor-pointer rounded border border-black/15 bg-transparent p-0.5 dark:border-white/15" /></div>
+              {selectedGraphic.graphicLayer.kind !== "arrow" && <div role="group" aria-label="Shape style" className="grid grid-cols-2 gap-1 rounded-md bg-black/5 p-1 dark:bg-white/5">{([false, true] as const).map((filled) => <button key={String(filled)} type="button" aria-pressed={selectedGraphic.graphicLayer?.filled === filled} onClick={() => updateGraphic({filled})} className={`rounded px-2 py-1.5 text-xs ${selectedGraphic.graphicLayer?.filled === filled ? "bg-white shadow-sm dark:bg-[#303030]" : ""}`}>{filled ? "Filled" : "Outline"}</button>)}</div>}
+              {(!selectedGraphic.graphicLayer.filled || selectedGraphic.graphicLayer.kind === "arrow") && <label className="block space-y-1 text-xs"><span className="flex justify-between"><span>Thickness</span><span>{selectedGraphic.graphicLayer.strokeWidth}px</span></span><input type="range" min={1} max={24} value={selectedGraphic.graphicLayer.strokeWidth} onChange={(event) => updateGraphic({strokeWidth: Number(event.target.value)})} className="w-full accent-emerald-600" /></label>}
+            </>}
+            <label className="block space-y-1 text-xs"><span className="flex justify-between"><span>Opacity</span><span>{selectedGraphic.graphicLayer.opacity}%</span></span><input type="range" min={0} max={100} value={selectedGraphic.graphicLayer.opacity} onChange={(event) => updateGraphic({opacity: Number(event.target.value)})} className="w-full accent-emerald-600" /></label>
+          </section>}
+          {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
         </div>
-        {error && <p role="alert" className="text-sm text-red-500">{error}</p>}
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={() => setOpen(false)} className="rounded-md px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-white/10">Cancel</button>
-          <button type="button" onClick={apply} disabled={!ready || !marks.length} className="flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"><Check size={16} />Apply</button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      </aside>, document.body)}
+    </>
   );
 }

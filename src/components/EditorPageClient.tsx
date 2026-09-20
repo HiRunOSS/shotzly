@@ -1,6 +1,8 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
+import Image from "next/image";
+import Link from "next/link";
 import CodeSnippet from "@/components/CodeSnippet";
 import ScreenshotSnippet from "@/components/ScreenshotSnippet";
 import ScreenshotMarkup from "@/components/ScreenshotMarkup";
@@ -12,7 +14,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {Label} from "@/components/ui/label";
 import {
@@ -34,15 +35,9 @@ import {
   saveNodeAsSvg,
   writeImageToClipboard,
 } from "@/utils/snippetExport";
-import {Check, Copy, Download, ImageIcon, ImagePlus, Loader2, Redo2, Trash2, Undo2} from "lucide-react";
-import {FaGithub} from "react-icons/fa6";
-
-const X_PROFILE_URL = "https://x.com/hiarun02";
-const GITHUB_REPO_URL = "https://github.com/HiRunOSS/shotzly";
+import {Copy, Download, ImageIcon, ImagePlus, Redo2, Trash2, Undo2} from "lucide-react";
 
 export default function EditorPageClient() {
-  const [stars, setStars] = useState<number | null>(null);
-  const [displayStars, setDisplayStars] = useState(0);
   const [codeExportStatus, setCodeExportStatus] = useState<
     "idle" | "png" | "svg" | "copy" | "error"
   >("idle");
@@ -79,6 +74,27 @@ export default function EditorPageClient() {
   const redo = useEditorStore((state) => state.redo);
   const [copyStatus, setCopyStatus] = useState<"idle" | "copying" | "copied" | "error">("idle");
   const [copyError, setCopyError] = useState("");
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [editSidebarOpen, setEditSidebarOpen] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!exportMenuOpen) return;
+
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!exportMenuRef.current?.contains(event.target as Node)) setExportMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setExportMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [exportMenuOpen]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -131,49 +147,6 @@ export default function EditorPageClient() {
       setEditorMode(mode);
     }
   }, [hydrateFromStorage, setEditorMode]);
-
-  useEffect(() => {
-    const fetchStars = async () => {
-      try {
-        const response = await fetch(
-          "https://api.github.com/repos/HiRunOSS/shotzly",
-        );
-
-        if (!response.ok) {
-          throw new Error(`GitHub API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (typeof data?.stargazers_count === "number") {
-          setStars(data.stargazers_count);
-        }
-      } catch (error) {
-        console.error("Failed to fetch GitHub stars", error);
-      }
-    };
-
-    fetchStars();
-  }, []);
-
-  useEffect(() => {
-    if (stars === null) {
-      return;
-    }
-
-    let current = 0;
-    const target = stars;
-    const step = Math.max(1, Math.floor(target / 40));
-    const interval = setInterval(() => {
-      current = Math.min(current + step, target);
-      setDisplayStars(current);
-
-      if (current >= target) {
-        clearInterval(interval);
-      }
-    }, 25);
-
-    return () => clearInterval(interval);
-  }, [stars]);
 
   const runCodeExport = async (
     action: "png" | "svg" | "copy",
@@ -231,74 +204,47 @@ export default function EditorPageClient() {
     <div className="flex h-dvh flex-col overflow-hidden bg-gradient-to-b from-white via-white to-gray-50 dark:from-[#111010] dark:via-[#111010] dark:to-[#111010]">
       <header className="fixed inset-x-0 top-3 z-20 px-3 sm:top-6 sm:px-6">
         <div className="mx-auto grid w-full grid-cols-1 items-start gap-2 min-[1400px]:grid-cols-[1fr_460px_1fr]">
-          <div className="order-2 mx-auto w-full max-w-[460px] rounded-2xl bg-white/40 p-2 backdrop-blur-2xl dark:bg-[#111010]/70 min-[1400px]:order-none min-[1400px]:col-start-2 min-[1400px]:row-start-1">
-            <div className="flex w-full items-center justify-center">
-              <Button
+          <div className="order-2 mx-auto w-fit rounded-md border border-white/20 bg-[#1f1f1f] p-1 sm:p-0.5 min-[1400px]:order-none min-[1400px]:col-start-2 min-[1400px]:row-start-1">
+            <div role="group" aria-label="Editor mode" className="relative flex items-center gap-1">
+              <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-[110px] rounded bg-white shadow-sm transition-transform duration-200 ease-out motion-reduce:transition-none ${editorMode === "code" ? "translate-x-[114px]" : "translate-x-0"}`} />
+              <button
                 type="button"
                 aria-pressed={editorMode === "screenshot"}
-                variant="ghost"
-                className={`h-9 flex-1 rounded-xl border text-sm transition-colors hover:border-white hover:bg-white hover:text-black ${
+                className={`relative z-10 h-9 w-[110px] rounded px-2 text-sm transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white/70 motion-reduce:transition-none sm:h-8 ${
                   editorMode === "screenshot"
-                    ? "border-white bg-white text-black shadow-sm"
-                    : "border-transparent text-gray-800 hover:shadow-sm dark:text-white dark:hover:text-black"
+                    ? "font-semibold text-[#111]"
+                    : "text-white/70 hover:text-white"
                 }`}
                 onClick={() => setEditorMode("screenshot")}
               >
                 Screenshot
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
                 aria-pressed={editorMode === "code"}
-                variant="ghost"
-                className={`h-9 flex-1 rounded-xl border text-sm transition-colors hover:border-white hover:bg-white hover:text-black ${
+                className={`relative z-10 h-9 w-[110px] rounded px-2 text-sm transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white/70 motion-reduce:transition-none sm:h-8 ${
                   editorMode === "code"
-                    ? "border-white bg-white text-black shadow-sm"
-                    : "border-transparent text-gray-800 hover:shadow-sm dark:text-white dark:hover:text-black"
+                    ? "font-semibold text-[#111]"
+                    : "text-white/70 hover:text-white"
                 }`}
                 onClick={() => setEditorMode("code")}
               >
                 Code
-              </Button>
+              </button>
             </div>
           </div>
 
           <div className="flex w-full justify-between gap-2 min-[1400px]:contents">
-            <div className="hidden w-fit items-center gap-1.5 rounded-xl border border-black/10 bg-white/35 p-1 text-gray-900 shadow-sm backdrop-blur-2xl dark:border-white/10 dark:bg-[#111010]/65 dark:text-white sm:flex min-[1400px]:col-start-1 min-[1400px]:row-start-1">
-              <a
-                href={GITHUB_REPO_URL}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Star Shotzly on GitHub"
-                className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold leading-none tabular-nums text-gray-700 transition-colors hover:bg-black/5 hover:text-black focus:outline-none focus:ring-1 focus:ring-blue-400 dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
-              >
-                <FaGithub className="h-3.5 w-3.5 text-gray-500 dark:text-white/55" />
-                {stars === null ? (
-                  <span
-                    className="h-3 w-3 rounded-full border-2 border-gray-400 border-t-transparent animate-spin dark:border-white/45 dark:border-t-transparent"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <span>{displayStars.toLocaleString()}</span>
-                )}
-              </a>
-              <a
-                href={X_PROFILE_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="min-w-[108px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold leading-none text-gray-800 transition-colors hover:bg-black/5 hover:text-black focus:outline-none focus:ring-1 focus:ring-blue-400 dark:text-white/85 dark:hover:bg-white/10 dark:hover:text-white"
-              >
-                Made by Arun
-              </a>
-            </div>
+            <Link href="/" aria-label="Shotzly home" className="flex h-9 shrink-0 items-center gap-2 rounded-md px-1 text-sm font-semibold text-gray-900 transition-colors hover:text-gray-600 dark:text-white dark:hover:text-white/70 min-[1400px]:col-start-1 min-[1400px]:row-start-1">
+              <Image src="/icon.svg" alt="" width={24} height={24} />
+              <span>Shotzly</span>
+            </Link>
 
             <div className="ml-auto flex w-fit flex-wrap items-center gap-0.5 rounded-xl border border-black/10 bg-white/35 p-0.5 text-gray-900 shadow-sm backdrop-blur-2xl dark:border-white/10 dark:bg-[#111010]/65 dark:text-white min-[1400px]:col-start-3 min-[1400px]:row-start-1">
               <button type="button" aria-label="Undo" title="Undo" disabled={!canUndo || isExporting} onClick={undo} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5 disabled:opacity-35 dark:hover:bg-white/10"><Undo2 size={16} /></button>
               <button type="button" aria-label="Redo" title="Redo" disabled={!canRedo || isExporting} onClick={redo} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5 disabled:opacity-35 dark:hover:bg-white/10"><Redo2 size={16} /></button>
-              {editorMode === "screenshot" && <ScreenshotMarkup />}
+              {editorMode === "screenshot" && <ScreenshotMarkup sidebarOpen={editSidebarOpen} onSidebarOpenChange={setEditSidebarOpen} />}
               {editorMode === "screenshot" && (uploadedImage || hasExtraImages) && <button type="button" title="Add screenshots" aria-label="Add screenshots" onClick={() => document.getElementById("additional-screenshot-files")?.click()} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10"><ImagePlus size={16} /></button>}
-              <button type="button" aria-label={copyStatus === "copied" ? "Image copied" : "Copy image"} title={copyStatus === "copied" ? "Image copied" : "Copy image"} disabled={isExporting || !previewRef || (editorMode === "screenshot" && !uploadedImage && !hasExtraImages)} onClick={copyImage} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5 disabled:opacity-35 dark:hover:bg-white/10">
-                {copyStatus === "copying" ? <Loader2 size={16} className="animate-spin" /> : copyStatus === "copied" ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
-              </button>
               <span role="status" className="sr-only">{copyStatus === "copied" ? "Image copied to clipboard" : ""}</span>
               {copyError && <p role="alert" className="absolute right-0 top-full mt-2 w-64 rounded-md bg-red-950 p-3 text-xs text-white">{copyError}</p>}
               {editorMode === "screenshot" && (uploadedImage || selectedImage) ? (
@@ -314,19 +260,32 @@ export default function EditorPageClient() {
                 </Button>
               ) : null}
 
-              <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              aria-label="Open export options"
-              title="Export image"
-              className="h-8 gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-gray-800 hover:bg-black/5 hover:text-black dark:text-white/85 dark:hover:bg-white/10 dark:hover:text-white"
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
-          </DialogTrigger>
+              <div ref={exportMenuRef} className="relative">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  aria-label="Export image"
+                  aria-expanded={exportMenuOpen}
+                  aria-controls="export-actions"
+                  title="Export image"
+                  onClick={() => setExportMenuOpen((open) => !open)}
+                  className="h-8 gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-gray-800 hover:bg-black/5 hover:text-black dark:text-white/85 dark:hover:bg-white/10 dark:hover:text-white"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Export</span>
+                </Button>
+                {exportMenuOpen && (
+                  <div id="export-actions" className="absolute right-0 top-full z-30 mt-2 w-44 rounded-md border border-white/15 bg-[#15171c] p-1 text-gray-100 shadow-lg">
+                    <button type="button" disabled={isExporting || !previewRef || (editorMode === "screenshot" && !uploadedImage && !hasExtraImages)} onClick={() => { setExportMenuOpen(false); void copyImage(); }} className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50">
+                      <Copy size={16} /> Copy Image
+                    </button>
+                    <button type="button" onClick={() => { setExportMenuOpen(false); setExportDialogOpen(true); }} className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-white/10">
+                      <Download size={16} /> Download
+                    </button>
+                  </div>
+                )}
+              </div>
+              <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
           <DialogContent className="sm:max-w-[340px] border-white/10 bg-[#15171c] p-4 text-gray-100">
             <DialogHeader>
               <DialogTitle>
@@ -474,7 +433,7 @@ export default function EditorPageClient() {
       </header>
 
       <main className="flex min-h-0 flex-1 items-center justify-center overflow-auto px-3 pb-28 pt-32 sm:px-4 sm:pb-32 sm:pt-36 min-[1400px]:pt-28">
-        <div className="flex h-full min-h-0 w-full min-w-0 max-w-7xl items-center justify-center overflow-hidden rounded-lg bg-white/20 backdrop-blur-2xl dark:bg-[#111010]/70">
+        <div className={`flex h-full min-h-0 w-full min-w-0 max-w-7xl items-center justify-center overflow-hidden rounded-lg bg-white/20 backdrop-blur-2xl dark:bg-[#111010]/70 ${editSidebarOpen && editorMode === "screenshot" ? "lg:max-w-[calc(100vw-672px)]" : ""}`}>
           {editorMode === "code" ? (
             <CodeSnippet />
           ) : (

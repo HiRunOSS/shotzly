@@ -31,7 +31,8 @@ function ImageLayer({image, stage, fallback}: {image: CanvasImage; stage: RefObj
   const browser = style.browserStyle !== "none";
   const dark = style.browserStyle.endsWith("dark");
   const frame = style.frameStyle;
-  const border = frame === "default" || browser ? "none" : `${style.borderWidth}px ${frame === "dashed" || frame === "dotted" ? frame : "solid"} ${frame.includes("dark") ? "#222" : "rgba(255,255,255,0.75)"}`;
+  const frameColor = /^#[0-9a-fA-F]{6}$/.test(style.borderColor ?? "") ? style.borderColor : "#ffffff";
+  const border = frame === "default" || browser ? "none" : `${style.borderWidth}px ${frame === "dashed" || frame === "dotted" ? frame : "solid"} ${frame === "glass" ? `${frameColor}99` : frameColor}`;
   const update = (patch: Partial<ScreenshotSettings>) => {
     const store = useEditorStore.getState();
     store.setCanvasImages(store.canvasImages.map((item) => item.id === image.id ? {
@@ -52,7 +53,7 @@ function ImageLayer({image, stage, fallback}: {image: CanvasImage; stage: RefObj
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={image.src} alt={image.name} draggable={false} className="block h-auto w-full" />
       </div>
-      <ScreenshotTransformControls target={target} settings={transformSettings} coordinateSpace={stage}
+      <ScreenshotTransformControls target={target} settings={transformSettings} coordinateSpace={stage} maxScale={600}
         style={{left: 0, top: 0}} selected={selected} onSelect={(value) => select(value ? image.id : null)}
         onChange={update} onDuplicate={() => {
           const store = useEditorStore.getState();

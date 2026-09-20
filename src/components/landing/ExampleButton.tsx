@@ -35,7 +35,7 @@ export default function ExampleButton({example, children = "Use this template", 
         store.setCodeLanguage("javascript");store.setCodeThemePreset("shotzly-emerald-night");store.setCodeWindowStyle("macos");store.setCodeWindowTitle("create.ts");store.setFontSize(20);store.setCodePadding(48);store.setCodeGradient("#b5dbbe");store.setIsBackgroundHidden(false);
       } else {
         store.setScreenshotSettings(settings);
-        store.setScreenshotGradient(example === "comparison" ? "center / cover no-repeat url('/backgrounds/macos/mac-bg-1.png')" : "center / cover no-repeat url('/backgrounds/macos/mac-bg-2.jpg')");
+        store.setScreenshotGradient(example === "comparison" ? "center / cover no-repeat url('/backgrounds/macos/mac-bg-1.webp')" : "center / cover no-repeat url('/backgrounds/macos/mac-bg-2.webp')");
         store.setUploadedImage("");
         store.setCanvasImages(sources.map((src, index) => ({id: crypto.randomUUID(), src, name: index ? "Before" : "After", x: example === "comparison" ? (index ? 26 : 76) : 50, y: example === "comparison" ? (index ? 68 : 34) : 50, width: example === "comparison" ? 44 : 76, rotation: 0, radius: 12, shadow: true, settings})));
         store.selectCanvasImage(null);

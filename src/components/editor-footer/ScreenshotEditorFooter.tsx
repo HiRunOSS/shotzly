@@ -1,9 +1,9 @@
 "use client";
 
-import {useEffect, useRef, useState, type CSSProperties} from "react";
-import {Button} from "../ui/button";
-import {Label} from "../ui/label";
-import {ChevronDown} from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { ChevronDown } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,8 +21,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import {useEditorStore} from "@/store/useEditorStore";
-import {LAYOUT_PRESET_CATEGORIES} from "@/constants/layoutPresets";
+import { useEditorStore } from "@/store/useEditorStore";
+import { LAYOUT_PRESET_CATEGORIES } from "@/constants/layoutPresets";
 import BackgroundSelect from "./BackgroundSelect";
 import type {
   ScreenshotAspectRatio,
@@ -43,27 +43,27 @@ const BROWSER_OPTIONS: Array<{
   label: string;
   variant: "none" | "light" | "dark";
 }> = [
-  {value: "none", label: "None", variant: "none"},
-  {value: "safari", label: "Safari", variant: "light"},
-  {value: "safari-dark", label: "Safari Dark", variant: "dark"},
-  {value: "chrome", label: "Chrome", variant: "light"},
-  {value: "chrome-dark", label: "Chrome Dark", variant: "dark"},
-];
+    { value: "none", label: "None", variant: "none" },
+    { value: "safari", label: "Safari", variant: "light" },
+    { value: "safari-dark", label: "Safari Dark", variant: "dark" },
+    { value: "chrome", label: "Chrome", variant: "light" },
+    { value: "chrome-dark", label: "Chrome Dark", variant: "dark" },
+  ];
 
 const SCREENSHOT_ASPECT_OPTIONS: Array<{
   value: ScreenshotAspectRatio;
   label: string;
 }> = [
-  {value: "16:9", label: "16:9"},
-  {value: "3:2", label: "3:2"},
-  {value: "4:3", label: "4:3"},
-  {value: "5:4", label: "5:4"},
-  {value: "1:1", label: "1:1"},
-  {value: "4:5", label: "4:5"},
-  {value: "3:4", label: "3:4"},
-  {value: "2:3", label: "2:3"},
-  {value: "9:16", label: "9:16"},
-];
+    { value: "16:9", label: "16:9" },
+    { value: "3:2", label: "3:2" },
+    { value: "4:3", label: "4:3" },
+    { value: "5:4", label: "5:4" },
+    { value: "1:1", label: "1:1" },
+    { value: "4:5", label: "4:5" },
+    { value: "3:4", label: "3:4" },
+    { value: "2:3", label: "2:3" },
+    { value: "9:16", label: "9:16" },
+  ];
 
 const clampCornerRadius = (value: number) => {
   return Number.isFinite(value) ? Math.max(0, Math.min(64, value)) : 16;
@@ -74,21 +74,21 @@ const CORNER_PRESETS: Array<{
   value: "sharp" | "curved" | "round";
   radius: number;
 }> = [
-  {label: "Sharp", value: "sharp", radius: 0},
-  {label: "Curved", value: "curved", radius: 16},
-  {label: "Round", value: "round", radius: 28},
-];
+    { label: "Sharp", value: "sharp", radius: 0 },
+    { label: "Curved", value: "curved", radius: 16 },
+    { label: "Round", value: "round", radius: 28 },
+  ];
 
 const FRAME_OPTIONS: Array<{
   value: ScreenshotFrameStyle;
   label: string;
 }> = [
-  {value: "default", label: "None"},
-  {value: "glass", label: "Glass"},
-  {value: "border", label: "Border"},
-  {value: "dotted", label: "Dotted"},
-  {value: "dashed", label: "Dashed"},
-];
+    { value: "default", label: "None" },
+    { value: "glass", label: "Glass" },
+    { value: "border", label: "Border" },
+    { value: "dotted", label: "Dotted" },
+    { value: "dashed", label: "Dashed" },
+  ];
 
 const clampBorderWidth = (value: number) => {
   return Number.isFinite(value) ? Math.max(0, Math.min(24, value)) : 0;
@@ -100,7 +100,7 @@ const getFrameLabel = (value: ScreenshotFrameStyle) => {
   );
 };
 
-function BrowserPreview({variant}: {variant: "none" | "light" | "dark"}) {
+function BrowserPreview({ variant }: { variant: "none" | "light" | "dark" }) {
   if (variant === "none") {
     return (
       <span className="h-4 w-7 rounded-[3px] border border-dashed border-gray-400 dark:border-gray-500" />
@@ -111,16 +111,14 @@ function BrowserPreview({variant}: {variant: "none" | "light" | "dark"}) {
 
   return (
     <span
-      className={`h-4 w-7 overflow-hidden rounded-[3px] border ${
-        isDark
+      className={`h-4 w-7 overflow-hidden rounded-[3px] border ${isDark
           ? "border-white/20 bg-[#121212]"
           : "border-black/15 bg-white"
-      }`}
+        }`}
     >
       <span
-        className={`flex h-1.5 items-center gap-0.5 px-1 ${
-          isDark ? "bg-[#303033]" : "bg-gray-100"
-        }`}
+        className={`flex h-1.5 items-center gap-0.5 px-1 ${isDark ? "bg-[#303033]" : "bg-gray-100"
+          }`}
       >
         <span className="h-0.5 w-0.5 rounded-full bg-[#ff5f57]" />
         <span className="h-0.5 w-0.5 rounded-full bg-[#ffbd2e]" />
@@ -236,7 +234,7 @@ export default function ScreenshotEditorFooter({
                 onChange={setGradient}
                 blurValue={settings.backgroundBlur}
                 onBlurChange={(backgroundBlur) =>
-                  onSettingsChange({...settings, backgroundBlur})
+                  onSettingsChange({ ...settings, backgroundBlur })
                 }
               />
             </div>
@@ -260,20 +258,18 @@ export default function ScreenshotEditorFooter({
                 >
                   <span>{getFrameLabel(settings.frameStyle)}</span>
                   <ChevronDown
-                    className={`h-3.5 w-3.5 text-gray-500 transition-transform dark:text-gray-300 ${
-                      isFrameOpen ? "rotate-180" : ""
-                    }`}
+                    className={`h-3.5 w-3.5 text-gray-500 transition-transform dark:text-gray-300 ${isFrameOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
                 {isFrameOpen ? (
                   <div
                     ref={frameDropdownRef}
-                    className={`z-50 rounded-lg border border-black/10 bg-white p-3 shadow-2xl shadow-black/20 dark:border-white/10 dark:bg-[#111010] dark:shadow-black/60 ${
-                      isFixedFrameDropdown
+                    className={`z-50 rounded-lg border border-black/10 bg-white p-3 shadow-2xl shadow-black/20 dark:border-white/10 dark:bg-[#111010] dark:shadow-black/60 ${isFixedFrameDropdown
                         ? "fixed"
                         : "absolute bottom-full left-0 mb-2 w-72"
-                    }`}
+                      }`}
                     style={isFixedFrameDropdown ? frameDropdownStyle : undefined}
                     onPointerDown={(event) => event.stopPropagation()}
                   >
@@ -292,14 +288,13 @@ export default function ScreenshotEditorFooter({
                                 frameStyle: option.value,
                               });
                             }}
-                            className={`flex h-16 flex-col items-center justify-center gap-1 rounded-md border text-[11px] transition ${
-                              isActive
+                            className={`flex h-16 flex-col items-center justify-center gap-1 rounded-md border text-[11px] transition ${isActive
                                 ? "border-orange-500 bg-orange-500/10 text-gray-950 dark:text-white"
                                 : "border-black/10 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/10"
-                            }`}
+                              }`}
                           >
                             <span className="flex h-7 w-9 items-center justify-center rounded bg-gray-200 dark:bg-[#1d2028]">
-                              <span className="h-5 w-6 rounded-[3px] bg-white dark:bg-gray-100" style={{border: option.value === "default" ? "none" : `2px ${option.value === "dashed" || option.value === "dotted" ? option.value : "solid"} ${option.value === "glass" ? `${safeBorderColor}99` : safeBorderColor}`}} />
+                              <span className="h-5 w-6 rounded-[3px] bg-white dark:bg-gray-100" style={{ border: option.value === "default" ? "none" : `2px ${option.value === "dashed" || option.value === "dotted" ? option.value : "solid"} ${option.value === "glass" ? `${safeBorderColor}99` : safeBorderColor}` }} />
                             </span>
                             <span>{option.label}</span>
                           </button>
@@ -313,7 +308,7 @@ export default function ScreenshotEditorFooter({
                           <span>Color</span>
                           <span className="flex items-center gap-2">
                             <span className="font-mono text-gray-500 dark:text-gray-400">{safeBorderColor.toUpperCase()}</span>
-                            <input type="color" value={safeBorderColor} aria-label="Border color" onChange={(event) => onSettingsChange({...settings, borderColor: event.target.value})} className="h-7 w-8 cursor-pointer rounded border border-black/20 bg-transparent p-0.5 dark:border-white/20" />
+                            <input type="color" value={safeBorderColor} aria-label="Border color" onChange={(event) => onSettingsChange({ ...settings, borderColor: event.target.value })} className="h-7 w-8 cursor-pointer rounded border border-black/20 bg-transparent p-0.5 dark:border-white/20" />
                           </span>
                         </label>
                         <div className="flex items-center justify-between">
@@ -369,11 +364,10 @@ export default function ScreenshotEditorFooter({
                                   cornerRadius: preset.radius,
                                 });
                               }}
-                              className={`rounded-md px-2 py-1.5 text-center text-[11px] transition ${
-                                isActive
+                              className={`rounded-md px-2 py-1.5 text-center text-[11px] transition ${isActive
                                   ? "bg-gray-950 text-white ring-1 ring-gray-950 dark:bg-white dark:text-black dark:ring-white"
                                   : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
-                              }`}
+                                }`}
                             >
                               {preset.label}
                             </button>
@@ -420,7 +414,7 @@ export default function ScreenshotEditorFooter({
               <Select
                 value={settings.layoutPreset}
                 onValueChange={(value: ScreenshotLayoutPreset) =>
-                  onSettingsChange({...settings, layoutPreset: value})
+                  onSettingsChange({ ...settings, layoutPreset: value })
                 }
               >
                 <SelectTrigger
@@ -462,7 +456,7 @@ export default function ScreenshotEditorFooter({
               <Select
                 value={settings.shadowStyle}
                 onValueChange={(value: "none" | "hug" | "soft" | "strong") =>
-                  onSettingsChange({...settings, shadowStyle: value})
+                  onSettingsChange({ ...settings, shadowStyle: value })
                 }
               >
                 <SelectTrigger
@@ -490,7 +484,7 @@ export default function ScreenshotEditorFooter({
               <Select
                 value={settings.browserStyle}
                 onValueChange={(value: ScreenshotBrowserStyle) =>
-                  onSettingsChange({...settings, browserStyle: value})
+                  onSettingsChange({ ...settings, browserStyle: value })
                 }
               >
                 <SelectTrigger
@@ -557,19 +551,17 @@ export default function ScreenshotEditorFooter({
                               });
                               setIsSizeDialogOpen(false);
                             }}
-                            className={`rounded-lg border p-2 text-center transition-colors ${
-                              isActive
+                            className={`rounded-lg border p-2 text-center transition-colors ${isActive
                                 ? "border-emerald-400 bg-emerald-500/10"
                                 : "border-white/15 bg-white/5 hover:border-white/30"
-                            }`}
+                              }`}
                           >
                             <span className="flex h-14 items-center justify-center">
                               <span
-                                className={`inline-block max-h-full max-w-full rounded-[6px] border ${
-                                  isActive
+                                className={`inline-block max-h-full max-w-full rounded-[6px] border ${isActive
                                     ? "border-emerald-300"
                                     : "border-white/30"
-                                }`}
+                                  }`}
                                 style={{
                                   aspectRatio: option.value.replace(":", " / "),
                                   width:

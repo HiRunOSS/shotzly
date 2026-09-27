@@ -22,6 +22,7 @@ export default function LandingFooter() {
     { href: "https://codehype.ai/product/shotzly?utm_source=codehype_badge", src: "https://codehype.ai/badges/shotzly.svg?variant=find-us&v=20", alt: "Featured on CodeHype", width: 180, height: 65 },
     { href: "https://nicklaunches.com/products/shotzly/?utm_source=shotzly.com&utm_medium=badge&utm_campaign=featured", src: "https://nicklaunches.com/badges/featured.png", alt: "Shotzly on Nick Launches", width: 244, height: 56 },
     { href: "https://www.makeitla.st/", src: "https://www.makeitla.st/badge/makeitlast-badge-light.svg?v=3", alt: "Featured on MakeItLast", width: 252, height: 76 },
+    { href: "https://sohamlaunches.com/p/shotzly", src: "https://sohamlaunches.com/badge/shotzly/launched-light.svg", alt: "Launched on SohamLaunches", width: 250, height: 54 },
   ];
   const footerLinks = [
     {label: "Privacy", href: "/privacy"},
